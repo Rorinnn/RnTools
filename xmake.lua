@@ -12,10 +12,29 @@ set_targetdir("build/$(mode)")
 
 add_requires("imgui", {configs = {dx11 = true, win32 = true}})
 
+local ProjectDir = os.scriptdir()
+local GeneratedDir = path.join(ProjectDir, "Generated")
+
 target("RorinnnTools")
     set_kind("static")
     set_languages("cxx20")
-    add_includedirs("inc", {public = true})
+    add_includedirs("inc", GeneratedDir, {public = true})
     add_files("src/**.cpp")
     add_packages("imgui", {public = true})
     add_syslinks("kernel32", "user32", "advapi32", "psapi", "ole32", "wbemuuid", "bcrypt", "windowscodecs", "d3dcompiler")
+    before_build(function ()
+        os.execv("python", {
+            path.join(ProjectDir, "GenerateBinaryResource.py"),
+            path.join(ProjectDir, "assets/ImguiRorinnn/Fonts/fa-solid-900.ttf"),
+            path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeSolidResource.hpp"),
+            "RorinnnTools::ImguiRorinnn::Resources",
+            "FontAwesomeSolidData"
+        })
+        os.execv("python", {
+            path.join(ProjectDir, "GenerateBinaryResource.py"),
+            path.join(ProjectDir, "assets/ImguiRorinnn/Fonts/fa-brands-400.ttf"),
+            path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeBrandsResource.hpp"),
+            "RorinnnTools::ImguiRorinnn::Resources",
+            "FontAwesomeBrandsData"
+        })
+    end)
