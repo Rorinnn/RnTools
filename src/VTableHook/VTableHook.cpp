@@ -19,13 +19,17 @@ static void Protect(void* Region, int Protection)
 
 void* RorinnnTools::VTable::Hook(void* Instance, void* HookFn, int Offset)
 {
-    intptr_t Table    = *((intptr_t*)Instance);
-    intptr_t Entry    = Table + sizeof(intptr_t) * Offset;
-    intptr_t Original = *((intptr_t*)Entry);
+    void** Table = *reinterpret_cast<void***>(Instance);
+    return HookSlot(&Table[Offset], HookFn);
+}
 
-    int OriginalProtection = Unprotect((void*)Entry);
-    *((intptr_t*)Entry)    = (intptr_t)HookFn;
-    Protect((void*)Entry, OriginalProtection);
+void* RorinnnTools::VTable::HookSlot(void** Slot, void* HookFn)
+{
+    void* Original = *Slot;
 
-    return (void*)Original;
+    int OriginalProtection = Unprotect(Slot);
+    *Slot                  = HookFn;
+    Protect(Slot, OriginalProtection);
+
+    return Original;
 }

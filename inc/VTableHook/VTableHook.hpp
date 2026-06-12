@@ -6,5 +6,6 @@
 
 namespace RorinnnTools::VTable
 {
+void* HookSlot(void** Slot, void* HookFn);
 void* Hook(void* Instance, void* HookFn, int Offset);
 } // namespace RorinnnTools::VTable
