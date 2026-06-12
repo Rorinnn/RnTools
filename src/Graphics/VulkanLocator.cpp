@@ -1,0 +1,169 @@
+// VulkanLocator — Vulkan 方法地址定位实现
+
+#include "Graphics/VulkanLocator.hpp"
+
+#include <Windows.h>
+
+namespace RorinnnTools::Graphics
+{
+#pragma region 方法表
+
+static constexpr const char* VulkanMethodNames[] = {
+    "vkCreateInstance",
+    "vkDestroyInstance",
+    "vkEnumeratePhysicalDevices",
+    "vkGetPhysicalDeviceFeatures",
+    "vkGetPhysicalDeviceFormatProperties",
+    "vkGetPhysicalDeviceImageFormatProperties",
+    "vkGetPhysicalDeviceProperties",
+    "vkGetPhysicalDeviceQueueFamilyProperties",
+    "vkGetPhysicalDeviceMemoryProperties",
+    "vkGetInstanceProcAddr",
+    "vkGetDeviceProcAddr",
+    "vkCreateDevice",
+    "vkDestroyDevice",
+    "vkEnumerateInstanceExtensionProperties",
+    "vkEnumerateDeviceExtensionProperties",
+    "vkEnumerateDeviceLayerProperties",
+    "vkGetDeviceQueue",
+    "vkQueueSubmit",
+    "vkQueueWaitIdle",
+    "vkDeviceWaitIdle",
+    "vkAllocateMemory",
+    "vkFreeMemory",
+    "vkMapMemory",
+    "vkUnmapMemory",
+    "vkFlushMappedMemoryRanges",
+    "vkInvalidateMappedMemoryRanges",
+    "vkGetDeviceMemoryCommitment",
+    "vkBindBufferMemory",
+    "vkBindImageMemory",
+    "vkGetBufferMemoryRequirements",
+    "vkGetImageMemoryRequirements",
+    "vkGetImageSparseMemoryRequirements",
+    "vkGetPhysicalDeviceSparseImageFormatProperties",
+    "vkQueueBindSparse",
+    "vkCreateFence",
+    "vkDestroyFence",
+    "vkResetFences",
+    "vkGetFenceStatus",
+    "vkWaitForFences",
+    "vkCreateSemaphore",
+    "vkDestroySemaphore",
+    "vkCreateEvent",
+    "vkDestroyEvent",
+    "vkGetEventStatus",
+    "vkSetEvent",
+    "vkResetEvent",
+    "vkCreateQueryPool",
+    "vkDestroyQueryPool",
+    "vkGetQueryPoolResults",
+    "vkCreateBuffer",
+    "vkDestroyBuffer",
+    "vkCreateBufferView",
+    "vkDestroyBufferView",
+    "vkCreateImage",
+    "vkDestroyImage",
+    "vkGetImageSubresourceLayout",
+    "vkCreateImageView",
+    "vkDestroyImageView",
+    "vkCreateShaderModule",
+    "vkDestroyShaderModule",
+    "vkCreatePipelineCache",
+    "vkDestroyPipelineCache",
+    "vkGetPipelineCacheData",
+    "vkMergePipelineCaches",
+    "vkCreateGraphicsPipelines",
+    "vkCreateComputePipelines",
+    "vkDestroyPipeline",
+    "vkCreatePipelineLayout",
+    "vkDestroyPipelineLayout",
+    "vkCreateSampler",
+    "vkDestroySampler",
+    "vkCreateDescriptorSetLayout",
+    "vkDestroyDescriptorSetLayout",
+    "vkCreateDescriptorPool",
+    "vkDestroyDescriptorPool",
+    "vkResetDescriptorPool",
+    "vkAllocateDescriptorSets",
+    "vkFreeDescriptorSets",
+    "vkUpdateDescriptorSets",
+    "vkCreateFramebuffer",
+    "vkDestroyFramebuffer",
+    "vkCreateRenderPass",
+    "vkDestroyRenderPass",
+    "vkGetRenderAreaGranularity",
+    "vkCreateCommandPool",
+    "vkDestroyCommandPool",
+    "vkResetCommandPool",
+    "vkAllocateCommandBuffers",
+    "vkFreeCommandBuffers",
+    "vkBeginCommandBuffer",
+    "vkEndCommandBuffer",
+    "vkResetCommandBuffer",
+    "vkCmdBindPipeline",
+    "vkCmdSetViewport",
+    "vkCmdSetScissor",
+    "vkCmdSetLineWidth",
+    "vkCmdSetDepthBias",
+    "vkCmdSetBlendConstants",
+    "vkCmdSetDepthBounds",
+    "vkCmdSetStencilCompareMask",
+    "vkCmdSetStencilWriteMask",
+    "vkCmdSetStencilReference",
+    "vkCmdBindDescriptorSets",
+    "vkCmdBindIndexBuffer",
+    "vkCmdBindVertexBuffers",
+    "vkCmdDraw",
+    "vkCmdDrawIndexed",
+    "vkCmdDrawIndirect",
+    "vkCmdDrawIndexedIndirect",
+    "vkCmdDispatch",
+    "vkCmdDispatchIndirect",
+    "vkCmdCopyBuffer",
+    "vkCmdCopyImage",
+    "vkCmdBlitImage",
+    "vkCmdCopyBufferToImage",
+    "vkCmdCopyImageToBuffer",
+    "vkCmdUpdateBuffer",
+    "vkCmdFillBuffer",
+    "vkCmdClearColorImage",
+    "vkCmdClearDepthStencilImage",
+    "vkCmdClearAttachments",
+    "vkCmdResolveImage",
+    "vkCmdSetEvent",
+    "vkCmdResetEvent",
+    "vkCmdWaitEvents",
+    "vkCmdPipelineBarrier",
+    "vkCmdBeginQuery",
+    "vkCmdEndQuery",
+    "vkCmdResetQueryPool",
+    "vkCmdWriteTimestamp",
+    "vkCmdCopyQueryPoolResults",
+    "vkCmdPushConstants",
+    "vkCmdBeginRenderPass",
+    "vkCmdNextSubpass",
+    "vkCmdEndRenderPass",
+    "vkCmdExecuteCommands",
+};
+
+#pragma endregion
+
+#pragma region 公开接口
+
+LocateStatus LocateVulkan(VulkanMethods& Out)
+{
+    HMODULE VulkanModule = GetModuleHandleA("vulkan-1.dll");
+    if (!VulkanModule) return LocateStatus::ModuleNotFound;
+
+    for (const char* Name : VulkanMethodNames)
+    {
+        void* Ptr         = reinterpret_cast<void*>(GetProcAddress(VulkanModule, Name));
+        Out.Methods[Name] = Ptr;
+    }
+
+    return LocateStatus::Ok;
+}
+
+#pragma endregion
+} // namespace RorinnnTools::Graphics
