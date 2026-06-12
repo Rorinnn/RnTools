@@ -2,8 +2,10 @@
 
 #include "MachineId/MachineId.hpp"
 
+#include "Crypto/Hash.hpp"
+#include "Encoding/Base64Url.hpp"
+
 #include <Windows.h>
-#include <bcrypt.h>
 #include <comdef.h>
 #include <wbemidl.h>
 
@@ -352,87 +354,6 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
     return Stream.str();
 }
 
-static bool Sha256Bytes(std::string_view Text, std::vector<uint8_t>& Hash)
-{
-    Hash.clear();
-
-    BCRYPT_ALG_HANDLE  AlgHandle  = nullptr;
-    BCRYPT_HASH_HANDLE HashHandle = nullptr;
-
-    NTSTATUS Status = BCryptOpenAlgorithmProvider(&AlgHandle, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
-    if (Status < 0)
-    {
-        return false;
-    }
-
-    Status = BCryptCreateHash(AlgHandle, &HashHandle, nullptr, 0, nullptr, 0, 0);
-    if (Status < 0)
-    {
-        BCryptCloseAlgorithmProvider(AlgHandle, 0);
-        return false;
-    }
-
-    Status = BCryptHashData(
-        HashHandle, reinterpret_cast<PUCHAR>(const_cast<char*>(Text.data())), static_cast<ULONG>(Text.size()), 0);
-    if (Status < 0)
-    {
-        BCryptDestroyHash(HashHandle);
-        BCryptCloseAlgorithmProvider(AlgHandle, 0);
-        return false;
-    }
-
-    Hash.resize(32);
-    Status = BCryptFinishHash(HashHandle, Hash.data(), static_cast<ULONG>(Hash.size()), 0);
-
-    BCryptDestroyHash(HashHandle);
-    BCryptCloseAlgorithmProvider(AlgHandle, 0);
-
-    if (Status < 0)
-    {
-        Hash.clear();
-        return false;
-    }
-
-    return true;
-}
-
-static std::string Base64UrlEncode(const std::vector<uint8_t>& Bytes)
-{
-    static constexpr char Alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-    std::string Result;
-    Result.reserve(((Bytes.size() + 2) / 3) * 4);
-
-    size_t i = 0;
-    while (i + 3 <= Bytes.size())
-    {
-        uint32_t Value = (static_cast<uint32_t>(Bytes[i]) << 16) | (static_cast<uint32_t>(Bytes[i + 1]) << 8) |
-                         static_cast<uint32_t>(Bytes[i + 2]);
-        Result.push_back(Alphabet[(Value >> 18) & 0x3F]);
-        Result.push_back(Alphabet[(Value >> 12) & 0x3F]);
-        Result.push_back(Alphabet[(Value >> 6) & 0x3F]);
-        Result.push_back(Alphabet[Value & 0x3F]);
-        i += 3;
-    }
-
-    size_t Remaining = Bytes.size() - i;
-    if (Remaining == 1)
-    {
-        uint32_t Value = static_cast<uint32_t>(Bytes[i]) << 16;
-        Result.push_back(Alphabet[(Value >> 18) & 0x3F]);
-        Result.push_back(Alphabet[(Value >> 12) & 0x3F]);
-    }
-    else if (Remaining == 2)
-    {
-        uint32_t Value = (static_cast<uint32_t>(Bytes[i]) << 16) | (static_cast<uint32_t>(Bytes[i + 1]) << 8);
-        Result.push_back(Alphabet[(Value >> 18) & 0x3F]);
-        Result.push_back(Alphabet[(Value >> 12) & 0x3F]);
-        Result.push_back(Alphabet[(Value >> 6) & 0x3F]);
-    }
-
-    return Result;
-}
-
 } // namespace
 
 bool BuildMachineCode(std::string& MachineCode)
@@ -472,12 +393,12 @@ bool BuildMachineCode(std::string& MachineCode)
     }
 
     std::vector<uint8_t> Hash;
-    if (!Sha256Bytes(Material, Hash))
+    if (!Crypto::Sha256Bytes(Material, Hash))
     {
         return false;
     }
 
-    MachineCode = Base64UrlEncode(Hash);
+    MachineCode = Encoding::Base64UrlEncode(Hash);
     return true;
 }
 
