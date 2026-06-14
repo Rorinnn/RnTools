@@ -1,6 +1,6 @@
 // VTableHook.cpp — 虚表函数替换工具
 
-#include "VTableHook/VTableHook.hpp"
+#include "Hook/VTableHook.hpp"
 
 static int Unprotect(void* Region)
 {
@@ -17,13 +17,13 @@ static void Protect(void* Region, int Protection)
     VirtualProtect(Mbi.BaseAddress, Mbi.RegionSize, Protection, &Mbi.Protect);
 }
 
-void* RorinnnTools::VTable::Hook(void* Instance, void* HookFn, int Offset)
+void* RorinnnTools::Hook::VTable::Hook(void* Instance, void* HookFn, int Offset)
 {
     void** Table = *reinterpret_cast<void***>(Instance);
     return HookSlot(&Table[Offset], HookFn);
 }
 
-void* RorinnnTools::VTable::HookSlot(void** Slot, void* HookFn)
+void* RorinnnTools::Hook::VTable::HookSlot(void** Slot, void* HookFn)
 {
     void* Original = *Slot;
 
