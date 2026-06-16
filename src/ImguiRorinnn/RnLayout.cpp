@@ -236,6 +236,39 @@ ImVec2 CalcWindowContentSize(float PreferredWidth, float PreferredHeight)
     return ImVec2(Width, Height);
 }
 
+float GetVerticalSplitterHitWidth()
+{
+    return VerticalSplitterOptions{}.HitWidth;
+}
+
+bool DrawVerticalSplitter(const char* Id, float Height)
+{
+    VerticalSplitterOptions Options = {};
+    Options.Height                  = Height;
+    return DrawVerticalSplitter(Id, Options);
+}
+
+bool DrawVerticalSplitter(const char* Id, const VerticalSplitterOptions& Options)
+{
+    ImGui::InvisibleButton(Id, ImVec2(Options.HitWidth, Options.Height));
+    const bool Hovered = ImGui::IsItemHovered();
+    const bool Active  = ImGui::IsItemActive();
+    if (Hovered || Active)
+    {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+    }
+
+    const ImVec2 HitMin    = ImGui::GetItemRectMin();
+    const ImVec2 HitMax    = ImGui::GetItemRectMax();
+    const float  CenterX   = (HitMin.x + HitMax.x) * 0.5f;
+    const float  HalfLineW = Options.LineWidth * 0.5f;
+    const ImVec2 LineMin(CenterX - HalfLineW, HitMin.y);
+    const ImVec2 LineMax(CenterX + HalfLineW, HitMax.y);
+    const ImU32  Color = ImGui::GetColorU32(Hovered || Active ? ImGuiCol_ButtonHovered : ImGuiCol_Border);
+    ImGui::GetWindowDrawList()->AddRectFilled(LineMin, LineMax, Color);
+    return Active && ImGui::IsMouseDragging(ImGuiMouseButton_Left);
+}
+
 bool BeginPanel(const char* Id, const PanelOptions& Options)
 {
     const SizeTokens& S          = Sizes();

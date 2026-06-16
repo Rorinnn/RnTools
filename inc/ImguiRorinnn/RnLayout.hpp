@@ -24,10 +24,20 @@ struct ModuleHeaderOptions
     float       AnimationSpeed              = 18.0f;
 };
 
+struct VerticalSplitterOptions
+{
+    float Height    = 0.0f;
+    float HitWidth  = 8.0f;
+    float LineWidth = 2.0f;
+};
+
 void   AddVerticalSpace(float Height);
 void   SameLineRight(float ItemWidth);
 ImVec2 CalcButtonSize(const char* Label, float MinWidth = 0.0f);
 ImVec2 CalcWindowContentSize(float PreferredWidth, float PreferredHeight);
+float  GetVerticalSplitterHitWidth();
+bool   DrawVerticalSplitter(const char* Id, float Height);
+bool   DrawVerticalSplitter(const char* Id, const VerticalSplitterOptions& Options = {});
 
 bool BeginPanel(const char* Id, const PanelOptions& Options = {});
 void EndPanel();
