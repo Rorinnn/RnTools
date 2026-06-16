@@ -13,8 +13,10 @@ namespace RorinnnTools::Hook
 enum class VehHookType
 {
     Int3,
+    Int3Trace,
     Int3Jump,
     HardwareBreakpoint,
+    HardwareTrace,
     HardwareJump,
 };
 
@@ -59,6 +61,7 @@ VehHookStatus AddVehHook(const VehHookOptions& Options);
 VehHookStatus RemoveVehHook(int Token);
 VehHookStatus RemoveAllVehHooks();
 VehHookStatus RefreshHardwareVehHooks();
+size_t        GetVehHookCount();
 
 const char* GetVehHookStatusName(VehHookStatus Status);
 } // namespace RorinnnTools::Hook

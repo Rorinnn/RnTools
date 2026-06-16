@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstring>
 #include <mutex>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -21,22 +22,27 @@ constexpr size_t AbsoluteJumpSize        = 14;
 
 struct VehHookRecord
 {
-    int                  Token             = 0;
-    void*                TargetAddress     = nullptr;
-    void*                RedirectAddress   = nullptr;
-    VehHookType          Type              = VehHookType::Int3;
-    uint8_t              OriginalByte      = 0;
-    void*                TrampolineAddress = nullptr;
-    size_t               TrampolineSize    = 0;
-    std::vector<uint8_t> TrampolineBytes   = {};
-    VehHookCallback      Callback          = {};
+    int                       Token             = 0;
+    void*                     TargetAddress     = nullptr;
+    void*                     RedirectAddress   = nullptr;
+    VehHookType               Type              = VehHookType::Int3;
+    uint8_t                   OriginalByte      = 0;
+    void*                     TrampolineAddress = nullptr;
+    size_t                    TrampolineSize    = 0;
+    std::vector<uint8_t>      TrampolineBytes   = {};
+    std::unordered_set<DWORD> TraceThreadIds    = {};
+    VehHookCallback           Callback          = {};
 };
 
 struct VehHookDispatch
 {
-    VehHookType     Type        = VehHookType::Int3;
-    void*           Destination = nullptr;
-    VehHookCallback Callback    = {};
+    VehHookType     Type         = VehHookType::Int3;
+    int             Token        = 0;
+    void*           Destination  = nullptr;
+    VehHookCallback Callback     = {};
+    bool            TraceStart   = false;
+    bool            TraceStep    = false;
+    bool            ContinueHere = false;
 };
 
 std::mutex                 HookMutex;
@@ -54,7 +60,13 @@ static bool IsJumpType(VehHookType Type)
 
 static bool IsHardwareType(VehHookType Type)
 {
-    return Type == VehHookType::HardwareBreakpoint || Type == VehHookType::HardwareJump;
+    return Type == VehHookType::HardwareBreakpoint || Type == VehHookType::HardwareTrace ||
+           Type == VehHookType::HardwareJump;
+}
+
+static bool IsInt3Type(VehHookType Type)
+{
+    return Type == VehHookType::Int3 || Type == VehHookType::Int3Trace || Type == VehHookType::Int3Jump;
 }
 
 static bool IsKnownType(VehHookType Type)
@@ -62,8 +74,10 @@ static bool IsKnownType(VehHookType Type)
     switch (Type)
     {
         case VehHookType::Int3:
+        case VehHookType::Int3Trace:
         case VehHookType::Int3Jump:
         case VehHookType::HardwareBreakpoint:
+        case VehHookType::HardwareTrace:
         case VehHookType::HardwareJump:
             return true;
         default:
@@ -396,7 +410,7 @@ static VehHookStatus InstallHookRecord(VehHookRecord& Record)
         if (Status != VehHookStatus::Ok) return Status;
     }
 
-    if (Record.Type == VehHookType::Int3 || Record.Type == VehHookType::Int3Jump)
+    if (IsInt3Type(Record.Type))
     {
         Status = InstallInt3Hook(Record);
     }
@@ -430,7 +444,7 @@ static VehHookStatus InstallHookRecord(VehHookRecord& Record)
 static VehHookStatus RemoveHookRecord(VehHookRecord& Record)
 {
     VehHookStatus Status = VehHookStatus::Ok;
-    if (Record.Type == VehHookType::Int3 || Record.Type == VehHookType::Int3Jump)
+    if (IsInt3Type(Record.Type))
     {
         Status = RemoveInt3Hook(Record);
     }
@@ -461,22 +475,66 @@ static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch
         return false;
     }
 
-    const DWORD ExceptionCode = PExceptionInfo->ExceptionRecord->ExceptionCode;
-    void*       Address       = PExceptionInfo->ExceptionRecord->ExceptionAddress;
+    const DWORD ExceptionCode   = PExceptionInfo->ExceptionRecord->ExceptionCode;
+    void*       Address         = PExceptionInfo->ExceptionRecord->ExceptionAddress;
+    const DWORD CurrentThreadId = GetCurrentThreadId();
 
     std::lock_guard<std::mutex> Guard(HookMutex);
-    for (const VehHookRecord& Record : HookRecords)
+    if (ExceptionCode == EXCEPTION_SINGLE_STEP)
+    {
+        for (VehHookRecord& Record : HookRecords)
+        {
+            if (Record.Type != VehHookType::Int3Trace) continue;
+
+            const auto FoundThread = Record.TraceThreadIds.find(CurrentThreadId);
+            if (FoundThread == Record.TraceThreadIds.end()) continue;
+
+            Record.TraceThreadIds.erase(FoundThread);
+            if (Record.TraceThreadIds.empty())
+            {
+                constexpr uint8_t Int3Opcode = 0xCC;
+                WriteMemoryBytes(Record.TargetAddress, &Int3Opcode, sizeof(Int3Opcode));
+            }
+
+            Dispatch.Type      = Record.Type;
+            Dispatch.Token     = Record.Token;
+            Dispatch.TraceStep = true;
+            return true;
+        }
+    }
+
+    for (VehHookRecord& Record : HookRecords)
     {
         if (Record.TargetAddress != Address) continue;
 
+        const bool TraceMatch      = ExceptionCode == EXCEPTION_BREAKPOINT && Record.Type == VehHookType::Int3Trace;
         const bool BreakpointMatch = ExceptionCode == EXCEPTION_BREAKPOINT &&
                                      (Record.Type == VehHookType::Int3 || Record.Type == VehHookType::Int3Jump);
         const bool HardwareMatch = ExceptionCode == EXCEPTION_SINGLE_STEP && IsHardwareType(Record.Type);
-        if (!BreakpointMatch && !HardwareMatch) continue;
+        if (!TraceMatch && !BreakpointMatch && !HardwareMatch) continue;
 
-        Dispatch.Type        = Record.Type;
-        Dispatch.Destination = IsJumpType(Record.Type) ? Record.TrampolineAddress : Record.RedirectAddress;
-        Dispatch.Callback    = Record.Callback;
+        if (TraceMatch)
+        {
+            if (!WriteMemoryBytes(Record.TargetAddress, &Record.OriginalByte, sizeof(Record.OriginalByte)))
+            {
+                return false;
+            }
+
+            Record.TraceThreadIds.insert(CurrentThreadId);
+        }
+
+        Dispatch.Type         = Record.Type;
+        Dispatch.Token        = Record.Token;
+        Dispatch.Destination  = TraceMatch
+                                    ? Record.TargetAddress
+                                    : (IsJumpType(Record.Type) ? Record.TrampolineAddress : Record.RedirectAddress);
+        Dispatch.Callback     = Record.Callback;
+        Dispatch.TraceStart   = TraceMatch;
+        Dispatch.ContinueHere = Record.Type == VehHookType::HardwareTrace;
+        if (Dispatch.ContinueHere)
+        {
+            Dispatch.Destination = Address;
+        }
         return Dispatch.Destination != nullptr;
     }
 
@@ -492,12 +550,40 @@ static void SetInstructionPointer(CONTEXT* PContext, void* PAddress)
 #endif
 }
 
+static void EnableSingleStep(CONTEXT* PContext)
+{
+    PContext->EFlags |= 0x100;
+}
+
+static void EnableResumeFlag(CONTEXT* PContext)
+{
+    PContext->EFlags |= 0x10000;
+}
+
+static bool IsTraceStepPending(int Token, DWORD ThreadId)
+{
+    std::lock_guard<std::mutex> Guard(HookMutex);
+    const auto                  Found = std::find_if(
+        HookRecords.begin(), HookRecords.end(), [&](const VehHookRecord& Record) { return Record.Token == Token; });
+    if (Found == HookRecords.end())
+    {
+        return false;
+    }
+
+    return Found->Type == VehHookType::Int3Trace && Found->TraceThreadIds.find(ThreadId) != Found->TraceThreadIds.end();
+}
+
 static LONG NTAPI VehExceptionHandler(PEXCEPTION_POINTERS PExceptionInfo)
 {
     VehHookDispatch Dispatch = {};
     if (!TryBuildDispatch(PExceptionInfo, Dispatch))
     {
         return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    if (Dispatch.TraceStep)
+    {
+        return EXCEPTION_CONTINUE_EXECUTION;
     }
 
     if (Dispatch.Callback)
@@ -510,14 +596,29 @@ static LONG NTAPI VehExceptionHandler(PEXCEPTION_POINTERS PExceptionInfo)
         PExceptionInfo->ContextRecord->Dr6 = 0;
     }
 
+    if (Dispatch.ContinueHere)
+    {
+        EnableResumeFlag(PExceptionInfo->ContextRecord);
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+
     SetInstructionPointer(PExceptionInfo->ContextRecord, Dispatch.Destination);
+    if (Dispatch.TraceStart && IsTraceStepPending(Dispatch.Token, GetCurrentThreadId()))
+    {
+        EnableSingleStep(PExceptionInfo->ContextRecord);
+    }
     return EXCEPTION_CONTINUE_EXECUTION;
 }
 
 static VehHookStatus ValidateOptions(const VehHookOptions& Options)
 {
     if (!IsKnownType(Options.Type)) return VehHookStatus::TypeInvalid;
-    if (!Options.TargetAddress || !Options.RedirectAddress) return VehHookStatus::InvalidArgument;
+    if (!Options.TargetAddress) return VehHookStatus::InvalidArgument;
+    if (Options.Type != VehHookType::Int3Trace && Options.Type != VehHookType::HardwareTrace &&
+        !Options.RedirectAddress)
+    {
+        return VehHookStatus::InvalidArgument;
+    }
     if (Options.TrampolineSize > 0 && !Options.TrampolineBytes) return VehHookStatus::InvalidArgument;
     if (!IsJumpType(Options.Type) && Options.TrampolineSize > 0) return VehHookStatus::InvalidArgument;
 
@@ -683,6 +784,12 @@ VehHookStatus RefreshHardwareVehHooks()
         }
     }
     return FirstError;
+}
+
+size_t GetVehHookCount()
+{
+    std::lock_guard<std::mutex> Guard(HookMutex);
+    return HookRecords.size();
 }
 
 const char* GetVehHookStatusName(VehHookStatus Status)
