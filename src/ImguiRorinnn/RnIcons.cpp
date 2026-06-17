@@ -1,6 +1,12 @@
 // RnIcons.cpp — ImguiRorinnn 图标枚举
 
-#include "ImguiRorinnn/RnIcons.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

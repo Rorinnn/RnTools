@@ -1,12 +1,18 @@
 // RnParticles.cpp — ImguiRorinnn 粒子效果
 
-#include "ImguiRorinnn/RnParticles.hpp"
+module;
 
-#include "ImguiRorinnn/RnTheme.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+
+#include <imgui.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

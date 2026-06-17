@@ -1,7 +1,12 @@
 // VehHook.cpp — VEH 异常 Hook 与跳板管理
 
-#include "Hook/VehHook.hpp"
+module;
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
 #include <TlHelp32.h>
 
 #include <algorithm>
@@ -10,6 +15,8 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Hook
 {

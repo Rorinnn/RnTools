@@ -1,15 +1,16 @@
 // RnLayout.cpp — ImguiRorinnn 布局组件
 
-#include "ImguiRorinnn/RnLayout.hpp"
+module;
 
-#include "ImguiRorinnn/RnAnimation.hpp"
-#include "ImguiRorinnn/RnFonts.hpp"
-#include "ImguiRorinnn/RnIcons.hpp"
-#include "ImguiRorinnn/RnTheme.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <vector>
 
 #include <imgui_internal.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

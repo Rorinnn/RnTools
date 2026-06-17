@@ -1,6 +1,14 @@
 // VTableHook.cpp — 虚表函数替换工具
 
-#include "Hook/VTableHook.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+
+module RorinnnTools;
 
 static int Unprotect(void* Region)
 {

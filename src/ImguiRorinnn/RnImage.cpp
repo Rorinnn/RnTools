@@ -1,12 +1,20 @@
 // RnImage.cpp — ImguiRorinnn DX11 图片资源工具
 
-#include "ImguiRorinnn/RnImage.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <limits>
 #include <vector>
 
+#include <d3d11.h>
+#include <imgui.h>
 #include <wincodec.h>
 #include <wrl/client.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

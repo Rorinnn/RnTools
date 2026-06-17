@@ -1,6 +1,10 @@
 // Base64Zlib.cpp — Base64 与 zlib 解码工具
 
-#include "Encoding/Base64Zlib.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <zlib.h>
@@ -8,6 +12,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Encoding
 {

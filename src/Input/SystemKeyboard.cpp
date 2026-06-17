@@ -1,8 +1,14 @@
 // SystemKeyboard.cpp — Windows 系统键盘输入封装
 
-#include "Input/SystemKeyboard.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Input
 {

@@ -1,6 +1,16 @@
 // GraphicsIntern — 图形方法定位内部工具实现
 
-#include "GraphicsIntern.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+
+#include <utility>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Graphics::detail
 {

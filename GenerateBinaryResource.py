@@ -40,18 +40,36 @@ def BuildHeader(DisplayPath, OutputFileName, Namespace, Name):
     return "\n".join(Lines)
 
 
-def BuildSource(InputPath, DisplayPath, HeaderFileName, OutputFileName, Namespace, Name):
+def BuildSourcePrefix(HeaderFileName, ModuleName):
+    if ModuleName:
+        return [
+            "module;",
+            "",
+            "#include <cstddef>",
+            "#include <cstdint>",
+            "",
+            f"module {ModuleName};",
+        ]
+
+    return [
+        f'#include "{HeaderFileName}"',
+    ]
+
+
+def BuildSource(InputPath, DisplayPath, HeaderFileName, OutputFileName, Namespace, Name, ModuleName):
     Data = InputPath.read_bytes()
     Lines = [
         f"// {OutputFileName} — 嵌入式二进制资源",
         f"// 自动生成: {DisplayPath}",
         "",
-        f'#include "{HeaderFileName}"',
+    ]
+    Lines.extend(BuildSourcePrefix(HeaderFileName, ModuleName))
+    Lines.extend([
         "",
         f"namespace {Namespace}",
         "{",
         f"extern const std::uint8_t {Name}[] = {{",
-    ]
+    ])
 
     for Offset in range(0, len(Data), 16):
         Chunk = Data[Offset:Offset + 16]
@@ -75,24 +93,39 @@ def WriteIfChanged(PathValue, Content):
 
 def Main():
     if len(sys.argv) < 3:
-        print("usage: GenerateBinaryResource.py <input> <output.hpp> [namespace] [name]")
+        print("usage: GenerateBinaryResource.py <input> <output.hpp> [namespace] [name] [--module <module>]")
         return 1
 
-    InputPath = Path(sys.argv[1]).resolve()
-    OutputPath = Path(sys.argv[2]).resolve()
+    Args = sys.argv[1:]
+    ModuleName = None
+    if "--module" in Args:
+        ModuleIndex = Args.index("--module")
+        if ModuleIndex + 1 >= len(Args):
+            print("missing module name after --module")
+            return 1
+        ModuleName = Args[ModuleIndex + 1]
+        del Args[ModuleIndex:ModuleIndex + 2]
+
+    if len(Args) < 2:
+        print("usage: GenerateBinaryResource.py <input> <output.hpp> [namespace] [name] [--module <module>]")
+        return 1
+
+    InputPath = Path(Args[0]).resolve()
+    OutputPath = Path(Args[1]).resolve()
     SourcePath = OutputPath.with_suffix(".cpp")
-    Namespace = sys.argv[3] if len(sys.argv) >= 4 else "RorinnnTools::Resources"
-    Name = BuildIdentifier(sys.argv[4] if len(sys.argv) >= 5 else InputPath.stem)
+    Namespace = Args[2] if len(Args) >= 3 else "RorinnnTools::Resources"
+    Name = BuildIdentifier(Args[3] if len(Args) >= 4 else InputPath.stem)
     try:
         DisplayPath = InputPath.relative_to(Path.cwd()).as_posix()
     except ValueError:
         DisplayPath = InputPath.as_posix()
 
     OutputPath.parent.mkdir(parents=True, exist_ok=True)
-    WriteIfChanged(OutputPath, BuildHeader(DisplayPath, OutputPath.name, Namespace, Name))
+    if not ModuleName:
+        WriteIfChanged(OutputPath, BuildHeader(DisplayPath, OutputPath.name, Namespace, Name))
     WriteIfChanged(
         SourcePath,
-        BuildSource(InputPath, DisplayPath, OutputPath.name, SourcePath.name, Namespace, Name),
+        BuildSource(InputPath, DisplayPath, OutputPath.name, SourcePath.name, Namespace, Name, ModuleName),
     )
     return 0
 

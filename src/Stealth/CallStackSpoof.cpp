@@ -1,13 +1,20 @@
 // CallStackSpoof.cpp — 用户态调用栈伪造实现
 
-#include "Stealth/CallStackSpoof.hpp"
+module;
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
 #include <Psapi.h>
 
 #include <algorithm>
 #include <cstring>
 #include <random>
 #include <vector>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Stealth
 {

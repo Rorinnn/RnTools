@@ -1,9 +1,15 @@
 // ProcessMemory.cpp — 当前进程内存安全读取工具
 
-#include "Memory/ProcessMemory.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <psapi.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Memory
 {

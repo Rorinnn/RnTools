@@ -1,12 +1,16 @@
 // D3D10Locator — D3D10 方法地址定位实现
 
-#include "Graphics/D3D10Locator.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <d3d10.h>
 #include <dxgi.h>
 
-#include "GraphicsIntern.hpp"
+module RorinnnTools;
 
 namespace RorinnnTools::Graphics
 {

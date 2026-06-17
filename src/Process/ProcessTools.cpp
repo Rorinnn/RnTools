@@ -1,8 +1,15 @@
 // ProcessTools.cpp — 进程查询与权限工具
 
-#include "Process/ProcessTools.hpp"
+module;
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
 #include <TlHelp32.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools
 {

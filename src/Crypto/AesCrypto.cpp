@@ -1,12 +1,18 @@
 // AesCrypto.cpp — Windows CryptoAPI AES-CBC 加密解密工具
 
-#include "Crypto/AesCrypto.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <wincrypt.h>
 
 #include <algorithm>
 #include <cstring>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Crypto
 {

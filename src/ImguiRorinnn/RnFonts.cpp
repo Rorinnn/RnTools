@@ -1,15 +1,21 @@
 // RnFonts.cpp — ImguiRorinnn 字体加载
 
-#include "ImguiRorinnn/RnFonts.hpp"
+module;
 
-#include "ImguiRorinnn/Resources/FontAwesomeBrandsResource.hpp"
-#include "ImguiRorinnn/Resources/FontAwesomeSolidResource.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #include <Windows.h>
 #endif
+
+#include <imgui.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

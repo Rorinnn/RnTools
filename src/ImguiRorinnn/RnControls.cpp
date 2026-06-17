@@ -1,11 +1,10 @@
 // RnControls.cpp — ImguiRorinnn 常用控件
 
-#include "ImguiRorinnn/RnControls.hpp"
+module;
 
-#include "ImguiRorinnn/RnAnimation.hpp"
-#include "ImguiRorinnn/RnFonts.hpp"
-#include "ImguiRorinnn/RnScope.hpp"
-#include "ImguiRorinnn/RnTheme.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -21,6 +20,8 @@
 #include <Windows.h>
 #include <shellapi.h>
 #endif
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

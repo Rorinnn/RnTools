@@ -19,7 +19,8 @@ local GeneratedDir = path.join(ProjectDir, "Generated")
 target("RorinnnTools")
     set_kind("static")
     set_languages("cxx20")
-    add_includedirs("inc", GeneratedDir, {public = true})
+    set_policy("build.c++.modules", true)
+    add_files("src/RorinnnTools.ixx", {public = true})
     add_files("src/**.cpp")
     add_packages("imgui", {public = true})
     add_packages("zlib", {public = true})
@@ -30,14 +31,18 @@ target("RorinnnTools")
             path.join(ProjectDir, "assets/ImguiRorinnn/Fonts/fa-solid-900.ttf"),
             path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeSolidResource.hpp"),
             "RorinnnTools::ImguiRorinnn::Resources",
-            "FontAwesomeSolidData"
+            "FontAwesomeSolidData",
+            "--module",
+            "RorinnnTools"
         })
         os.execv("python", {
             path.join(ProjectDir, "GenerateBinaryResource.py"),
             path.join(ProjectDir, "assets/ImguiRorinnn/Fonts/fa-brands-400.ttf"),
             path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeBrandsResource.hpp"),
             "RorinnnTools::ImguiRorinnn::Resources",
-            "FontAwesomeBrandsData"
+            "FontAwesomeBrandsData",
+            "--module",
+            "RorinnnTools"
         })
         target:add("files", path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeSolidResource.cpp"))
         target:add("files", path.join(GeneratedDir, "ImguiRorinnn/Resources/FontAwesomeBrandsResource.cpp"))

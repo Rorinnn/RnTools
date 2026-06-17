@@ -1,9 +1,10 @@
 // MachineId.cpp — Windows 机器码生成工具
 
-#include "MachineId/MachineId.hpp"
+module;
 
-#include "Crypto/Hash.hpp"
-#include "Encoding/Base64Url.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <comdef.h>
@@ -16,6 +17,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+module RorinnnTools;
 
 namespace RorinnnTools
 {

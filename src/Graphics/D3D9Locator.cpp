@@ -1,11 +1,15 @@
 // D3D9Locator — D3D9 方法地址定位实现
 
-#include "Graphics/D3D9Locator.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 #include <d3d9.h>
 
-#include "GraphicsIntern.hpp"
+module RorinnnTools;
 
 namespace RorinnnTools::Graphics
 {

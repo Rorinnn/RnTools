@@ -1,14 +1,18 @@
 // RnBlur.cpp — ImguiRorinnn DX11 高斯模糊工具
 
+module;
+
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 
-#include "ImguiRorinnn/RnBlur.hpp"
-
+#include <d3d11.h>
 #include <d3dcompiler.h>
+#include <imgui.h>
 
 #include <algorithm>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

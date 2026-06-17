@@ -1,8 +1,17 @@
 // VulkanLocator — Vulkan 方法地址定位实现
 
-#include "Graphics/VulkanLocator.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
+
+#include <string>
+#include <unordered_map>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Graphics
 {

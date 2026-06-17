@@ -1,11 +1,17 @@
 // ManualMapper.cpp — 手动映射注入实现
 
-#include "ManualMap/ManualMapper.hpp"
+module;
 
-#include "ManualMap/ManualMapTypes.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
 
 #include <cstdlib>
 #include <cstring>
+
+module RorinnnTools;
 
 namespace RorinnnTools
 {

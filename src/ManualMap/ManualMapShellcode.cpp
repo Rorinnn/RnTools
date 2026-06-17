@@ -1,6 +1,14 @@
 // ManualMapShellcode.cpp — 远程手动映射入口
 
-#include "ManualMap/ManualMapTypes.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <Windows.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools
 {

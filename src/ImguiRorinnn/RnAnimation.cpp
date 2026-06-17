@@ -1,10 +1,18 @@
 // RnAnimation.cpp — ImguiRorinnn 即时模式动画工具
 
-#include "ImguiRorinnn/RnAnimation.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <algorithm>
 #include <cmath>
 #include <unordered_map>
+
+#include <imgui.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

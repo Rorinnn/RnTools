@@ -1,8 +1,16 @@
 // RnTheme.cpp — ImguiRorinnn 主题令牌
 
-#include "ImguiRorinnn/RnTheme.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <algorithm>
+
+#include <imgui.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

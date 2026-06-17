@@ -1,6 +1,14 @@
 // RnScope.cpp — ImGui 样式作用域
 
-#include "ImguiRorinnn/RnScope.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <imgui.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::ImguiRorinnn
 {

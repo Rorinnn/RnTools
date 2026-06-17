@@ -1,6 +1,17 @@
 // Base64Url.cpp — Base64Url 编解码工具
 
-#include "Encoding/Base64Url.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Encoding
 {

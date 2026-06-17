@@ -1,9 +1,20 @@
 // Hash.cpp — 哈希工具
 
-#include "Crypto/Hash.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include <Windows.h>
 #include <bcrypt.h>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Crypto
 {

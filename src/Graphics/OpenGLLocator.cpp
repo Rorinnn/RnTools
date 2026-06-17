@@ -1,10 +1,18 @@
 // OpenGLLocator — OpenGL 方法地址定位实现
 
-#include "Graphics/OpenGLLocator.hpp"
+module;
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <Windows.h>
 
 #include <cstddef>
+#include <string>
+#include <unordered_map>
+
+module RorinnnTools;
 
 namespace RorinnnTools::Graphics
 {
