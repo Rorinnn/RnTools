@@ -8,5 +8,5 @@
 
 namespace RorinnnTools::Encoding
 {
-bool DecodeBase64Zlib(std::string_view Text, std::string& Plain, std::string& ErrorText, size_t MaxOutputSize);
+bool DecodeBase64Zlib(std::string_view Text, std::string& Plain, std::string& ErrorText);
 } // namespace RorinnnTools::Encoding

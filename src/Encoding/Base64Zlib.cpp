@@ -77,10 +77,7 @@ static bool DecodeBase64(std::string_view Text, std::vector<uint8_t>& Bytes, std
     return true;
 }
 
-static bool InflateZlib(const std::vector<uint8_t>& Compressed,
-                        std::string&                Plain,
-                        std::string&                ErrorText,
-                        size_t                      MaxOutputSize)
+static bool InflateZlib(const std::vector<uint8_t>& Compressed, std::string& Plain, std::string& ErrorText)
 {
     Plain.clear();
     ErrorText.clear();
@@ -111,13 +108,6 @@ static bool InflateZlib(const std::vector<uint8_t>& Compressed,
         const size_t Produced = Buffer.size() - Stream.avail_out;
         if (Produced > 0)
         {
-            if (Plain.size() + Produced > MaxOutputSize)
-            {
-                inflateEnd(&Stream);
-                Plain.clear();
-                ErrorText = "zlib 解压结果太大";
-                return false;
-            }
             Plain.append(reinterpret_cast<const char*>(Buffer.data()), Produced);
         }
 
@@ -144,15 +134,10 @@ static bool InflateZlib(const std::vector<uint8_t>& Compressed,
 }
 } // namespace
 
-bool DecodeBase64Zlib(std::string_view Text, std::string& Plain, std::string& ErrorText, size_t MaxOutputSize)
+bool DecodeBase64Zlib(std::string_view Text, std::string& Plain, std::string& ErrorText)
 {
     Plain.clear();
     ErrorText.clear();
-    if (MaxOutputSize == 0)
-    {
-        ErrorText = "输出限制无效";
-        return false;
-    }
 
     std::vector<uint8_t> Compressed;
     if (!DecodeBase64(Text, Compressed, ErrorText))
@@ -160,6 +145,6 @@ bool DecodeBase64Zlib(std::string_view Text, std::string& Plain, std::string& Er
         return false;
     }
 
-    return InflateZlib(Compressed, Plain, ErrorText, MaxOutputSize);
+    return InflateZlib(Compressed, Plain, ErrorText);
 }
 } // namespace RorinnnTools::Encoding
