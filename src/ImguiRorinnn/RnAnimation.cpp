@@ -2,13 +2,11 @@
 
 module;
 
-#include <algorithm>
-#include <cmath>
-#include <unordered_map>
 
 #include <imgui.h>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {

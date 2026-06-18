@@ -18,7 +18,7 @@ void __stdcall ManualMapShellcode(ManualMappingData* Data)
 
     BYTE* Base           = Data->Base;
     auto* OptionalHeader = &reinterpret_cast<IMAGE_NT_HEADERS*>(
-                                Base + reinterpret_cast<IMAGE_DOS_HEADER*>(reinterpret_cast<uintptr_t>(Base))->e_lfanew)
+                                Base + reinterpret_cast<IMAGE_DOS_HEADER*>(reinterpret_cast<std::uintptr_t>(Base))->e_lfanew)
                                 ->OptionalHeader;
 
     auto LoadLibraryA   = Data->LoadLibraryA;
@@ -34,7 +34,7 @@ void __stdcall ManualMapShellcode(ManualMappingData* Data)
         auto* RelocData = reinterpret_cast<IMAGE_BASE_RELOCATION*>(
             Base + OptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress);
         const auto* RelocEnd = reinterpret_cast<IMAGE_BASE_RELOCATION*>(
-            reinterpret_cast<uintptr_t>(RelocData) +
+            reinterpret_cast<std::uintptr_t>(RelocData) +
             OptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size);
 
         while (RelocData < RelocEnd && RelocData->SizeOfBlock)

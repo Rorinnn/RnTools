@@ -6,13 +6,11 @@ module;
 #include <Windows.h>
 #endif
 
-#include <cstddef>
-#include <cstdint>
-#include <limits>
 
 #include <imgui.h>
 
 module RorinnnTools;
+import std;
 
 extern "C"
 {
@@ -28,7 +26,7 @@ namespace
 {
 static FontSet g_Fonts;
 
-static size_t GetEmbeddedResourceSize(const uint8_t* PStart, const uint8_t* PEnd)
+static std::size_t GetEmbeddedResourceSize(const std::uint8_t* PStart, const std::uint8_t* PEnd)
 {
     const auto Start = reinterpret_cast<std::uintptr_t>(PStart);
     const auto End   = reinterpret_cast<std::uintptr_t>(PEnd);
@@ -54,8 +52,8 @@ static ImFont* LoadWindowsTextFont(ImFontAtlas* Atlas, float TextSize, bool& Use
 
 static ImFont* LoadIconFont(ImFontAtlas* Atlas, float IconSize, bool FixedWidth)
 {
-    const size_t SolidSize = GetEmbeddedResourceSize(_binary_FontAwesomeSolid_bin_start, _binary_FontAwesomeSolid_bin_end);
-    if (SolidSize == 0 || SolidSize > static_cast<size_t>(std::numeric_limits<int>::max()))
+    const std::size_t SolidSize = GetEmbeddedResourceSize(_binary_FontAwesomeSolid_bin_start, _binary_FontAwesomeSolid_bin_end);
+    if (SolidSize == 0 || SolidSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
         return nullptr;
     }
@@ -76,9 +74,9 @@ static ImFont* LoadIconFont(ImFontAtlas* Atlas, float IconSize, bool FixedWidth)
 
 static bool LoadBrandIcons(ImFontAtlas* Atlas, float IconSize, bool FixedWidth)
 {
-    const size_t BrandsSize =
+    const std::size_t BrandsSize =
         GetEmbeddedResourceSize(_binary_FontAwesomeBrands_bin_start, _binary_FontAwesomeBrands_bin_end);
-    if (BrandsSize == 0 || BrandsSize > static_cast<size_t>(std::numeric_limits<int>::max()))
+    if (BrandsSize == 0 || BrandsSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
         return false;
     }

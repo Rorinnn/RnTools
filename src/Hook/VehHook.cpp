@@ -5,14 +5,9 @@ module;
 #include <Windows.h>
 #include <TlHelp32.h>
 
-#include <algorithm>
-#include <cstring>
-#include <mutex>
-#include <unordered_set>
-#include <utility>
-#include <vector>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::Hook
 {
@@ -20,8 +15,8 @@ namespace
 {
 #pragma region 运行时状态
 
-constexpr size_t HardwareBreakpointCount = 4;
-constexpr size_t AbsoluteJumpSize        = 14;
+constexpr std::size_t HardwareBreakpointCount = 4;
+constexpr std::size_t AbsoluteJumpSize        = 14;
 
 struct VehHookRecord
 {
@@ -29,10 +24,10 @@ struct VehHookRecord
     void*                     TargetAddress     = nullptr;
     void*                     RedirectAddress   = nullptr;
     VehHookType               Type              = VehHookType::Int3;
-    uint8_t                   OriginalByte      = 0;
+    std::uint8_t                   OriginalByte      = 0;
     void*                     TrampolineAddress = nullptr;
-    size_t                    TrampolineSize    = 0;
-    std::vector<uint8_t>      TrampolineBytes   = {};
+    std::size_t                    TrampolineSize    = 0;
+    std::vector<std::uint8_t>      TrampolineBytes   = {};
     std::unordered_set<DWORD> TraceThreadIds    = {};
     VehHookCallback           Callback          = {};
 };
@@ -92,7 +87,7 @@ static bool IsKnownType(VehHookType Type)
 
 #pragma region 内存工具
 
-static bool ReadMemoryBytes(void* PAddress, void* PBuffer, size_t Size)
+static bool ReadMemoryBytes(void* PAddress, void* PBuffer, std::size_t Size)
 {
     if (!PAddress || !PBuffer || Size == 0) return false;
 
@@ -107,7 +102,7 @@ static bool ReadMemoryBytes(void* PAddress, void* PBuffer, size_t Size)
     }
 }
 
-static bool WriteMemoryBytes(void* PAddress, const void* PData, size_t Size)
+static bool WriteMemoryBytes(void* PAddress, const void* PData, std::size_t Size)
 {
     if (!PAddress || !PData || Size == 0) return false;
 
@@ -134,7 +129,7 @@ static bool WriteMemoryBytes(void* PAddress, const void* PData, size_t Size)
     return Written;
 }
 
-static void WriteAbsoluteJumpBytes(uint8_t* PBuffer, void* PTargetAddress)
+static void WriteAbsoluteJumpBytes(std::uint8_t* PBuffer, void* PTargetAddress)
 {
     PBuffer[0] = 0xFF;
     PBuffer[1] = 0x25;
@@ -143,14 +138,14 @@ static void WriteAbsoluteJumpBytes(uint8_t* PBuffer, void* PTargetAddress)
     PBuffer[4] = 0x00;
     PBuffer[5] = 0x00;
 
-    const uint64_t TargetAddress = reinterpret_cast<uint64_t>(PTargetAddress);
+    const std::uint64_t TargetAddress = reinterpret_cast<std::uint64_t>(PTargetAddress);
     std::memcpy(PBuffer + 6, &TargetAddress, sizeof(TargetAddress));
 }
 
 static VehHookStatus BuildTrampoline(VehHookRecord& Record)
 {
-    const size_t PrefixSize = Record.TrampolineBytes.size();
-    const size_t TotalSize  = PrefixSize + AbsoluteJumpSize;
+    const std::size_t PrefixSize = Record.TrampolineBytes.size();
+    const std::size_t TotalSize  = PrefixSize + AbsoluteJumpSize;
     if (TotalSize <= AbsoluteJumpSize && !Record.RedirectAddress) return VehHookStatus::InvalidArgument;
 
     void* TrampolineAddress = VirtualAlloc(nullptr, TotalSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -159,7 +154,7 @@ static VehHookStatus BuildTrampoline(VehHookRecord& Record)
         return VehHookStatus::AllocateFailed;
     }
 
-    uint8_t* TrampolineBytes = static_cast<uint8_t*>(TrampolineAddress);
+    std::uint8_t* TrampolineBytes = static_cast<std::uint8_t*>(TrampolineAddress);
     if (PrefixSize > 0)
     {
         std::memcpy(TrampolineBytes, Record.TrampolineBytes.data(), PrefixSize);
@@ -188,7 +183,7 @@ static VehHookStatus InstallInt3Hook(VehHookRecord& Record)
         return VehHookStatus::ReadFailed;
     }
 
-    constexpr uint8_t Int3Opcode = 0xCC;
+    constexpr std::uint8_t Int3Opcode = 0xCC;
     if (!WriteMemoryBytes(Record.TargetAddress, &Int3Opcode, sizeof(Int3Opcode)))
     {
         return VehHookStatus::WriteFailed;
@@ -211,7 +206,7 @@ static VehHookStatus RemoveInt3Hook(const VehHookRecord& Record)
 
 #pragma region 硬件断点
 
-static uint64_t GetDebugAddress(const CONTEXT& Context, size_t Slot)
+static std::uint64_t GetDebugAddress(const CONTEXT& Context, std::size_t Slot)
 {
     switch (Slot)
     {
@@ -228,7 +223,7 @@ static uint64_t GetDebugAddress(const CONTEXT& Context, size_t Slot)
     }
 }
 
-static void SetDebugAddress(CONTEXT& Context, size_t Slot, uint64_t Address)
+static void SetDebugAddress(CONTEXT& Context, std::size_t Slot, std::uint64_t Address)
 {
     switch (Slot)
     {
@@ -249,17 +244,17 @@ static void SetDebugAddress(CONTEXT& Context, size_t Slot, uint64_t Address)
     }
 }
 
-static bool IsHardwareSlotEnabled(const CONTEXT& Context, size_t Slot)
+static bool IsHardwareSlotEnabled(const CONTEXT& Context, std::size_t Slot)
 {
-    const uint64_t EnableBit = 1ull << (Slot * 2);
+    const std::uint64_t EnableBit = 1ull << (Slot * 2);
     return (Context.Dr7 & EnableBit) != 0;
 }
 
-static void ConfigureHardwareSlot(CONTEXT& Context, size_t Slot, uint64_t Address)
+static void ConfigureHardwareSlot(CONTEXT& Context, std::size_t Slot, std::uint64_t Address)
 {
-    const uint64_t LocalEnableBit  = 1ull << (Slot * 2);
-    const uint64_t GlobalEnableBit = 1ull << (Slot * 2 + 1);
-    const uint64_t ControlMask     = 0xFull << (16 + Slot * 4);
+    const std::uint64_t LocalEnableBit  = 1ull << (Slot * 2);
+    const std::uint64_t GlobalEnableBit = 1ull << (Slot * 2 + 1);
+    const std::uint64_t ControlMask     = 0xFull << (16 + Slot * 4);
 
     SetDebugAddress(Context, Slot, Address);
     Context.Dr7 |= LocalEnableBit;
@@ -267,11 +262,11 @@ static void ConfigureHardwareSlot(CONTEXT& Context, size_t Slot, uint64_t Addres
     Context.Dr7 &= ~ControlMask;
 }
 
-static void ClearHardwareSlot(CONTEXT& Context, size_t Slot)
+static void ClearHardwareSlot(CONTEXT& Context, std::size_t Slot)
 {
-    const uint64_t LocalEnableBit  = 1ull << (Slot * 2);
-    const uint64_t GlobalEnableBit = 1ull << (Slot * 2 + 1);
-    const uint64_t ControlMask     = 0xFull << (16 + Slot * 4);
+    const std::uint64_t LocalEnableBit  = 1ull << (Slot * 2);
+    const std::uint64_t GlobalEnableBit = 1ull << (Slot * 2 + 1);
+    const std::uint64_t ControlMask     = 0xFull << (16 + Slot * 4);
 
     SetDebugAddress(Context, Slot, 0);
     Context.Dr7 &= ~LocalEnableBit;
@@ -281,9 +276,9 @@ static void ClearHardwareSlot(CONTEXT& Context, size_t Slot)
 
 static VehHookStatus EnableHardwareBreakpoint(CONTEXT& Context, void* PTargetAddress)
 {
-    const uint64_t TargetAddress = reinterpret_cast<uint64_t>(PTargetAddress);
+    const std::uint64_t TargetAddress = reinterpret_cast<std::uint64_t>(PTargetAddress);
 
-    for (size_t i = 0; i < HardwareBreakpointCount; ++i)
+    for (std::size_t i = 0; i < HardwareBreakpointCount; ++i)
     {
         if (GetDebugAddress(Context, i) == TargetAddress)
         {
@@ -292,7 +287,7 @@ static VehHookStatus EnableHardwareBreakpoint(CONTEXT& Context, void* PTargetAdd
         }
     }
 
-    for (size_t i = 0; i < HardwareBreakpointCount; ++i)
+    for (std::size_t i = 0; i < HardwareBreakpointCount; ++i)
     {
         if (!IsHardwareSlotEnabled(Context, i) || GetDebugAddress(Context, i) == 0)
         {
@@ -306,9 +301,9 @@ static VehHookStatus EnableHardwareBreakpoint(CONTEXT& Context, void* PTargetAdd
 
 static VehHookStatus DisableHardwareBreakpoint(CONTEXT& Context, void* PTargetAddress)
 {
-    const uint64_t TargetAddress = reinterpret_cast<uint64_t>(PTargetAddress);
+    const std::uint64_t TargetAddress = reinterpret_cast<std::uint64_t>(PTargetAddress);
 
-    for (size_t i = 0; i < HardwareBreakpointCount; ++i)
+    for (std::size_t i = 0; i < HardwareBreakpointCount; ++i)
     {
         if (GetDebugAddress(Context, i) == TargetAddress)
         {
@@ -396,9 +391,9 @@ static VehHookStatus ApplyHardwareBreakpointToThreads(const VehHookRecord& Recor
     return FirstError;
 }
 
-static size_t CountHardwareHooks()
+static std::size_t CountHardwareHooks()
 {
-    return static_cast<size_t>(std::count_if(HookRecords.begin(),
+    return static_cast<std::size_t>(std::count_if(HookRecords.begin(),
                                              HookRecords.end(),
                                              [](const VehHookRecord& Record) { return IsHardwareType(Record.Type); }));
 }
@@ -495,7 +490,7 @@ static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch
             Record.TraceThreadIds.erase(FoundThread);
             if (Record.TraceThreadIds.empty())
             {
-                constexpr uint8_t Int3Opcode = 0xCC;
+                constexpr std::uint8_t Int3Opcode = 0xCC;
                 WriteMemoryBytes(Record.TargetAddress, &Int3Opcode, sizeof(Int3Opcode));
             }
 
@@ -789,7 +784,7 @@ VehHookStatus RefreshHardwareVehHooks()
     return FirstError;
 }
 
-size_t GetVehHookCount()
+std::size_t GetVehHookCount()
 {
     std::lock_guard<std::mutex> Guard(HookMutex);
     return HookRecords.size();

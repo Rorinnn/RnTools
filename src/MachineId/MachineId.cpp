@@ -6,19 +6,12 @@ module;
 #include <comdef.h>
 #include <wbemidl.h>
 
-#include <algorithm>
-#include <cctype>
-#include <cstdint>
-#include <cstdlib>
-#include <exception>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #include <botan/base64.h>
 #include <botan/hash.h>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools
 {
@@ -35,7 +28,7 @@ struct WmiQuery
 struct DiskInfo
 {
     std::string SerialNumber;
-    uint64_t    Size = 0;
+    std::uint64_t    Size = 0;
 };
 
 class ComScope
@@ -120,7 +113,7 @@ static std::string ToUtf8(const wchar_t* Text)
     int Size = WideCharToMultiByte(CP_UTF8, 0, Text, -1, nullptr, 0, nullptr, nullptr);
     if (Size <= 1) return {};
 
-    std::string Result(static_cast<size_t>(Size - 1), '\0');
+    std::string Result(static_cast<std::size_t>(Size - 1), '\0');
     WideCharToMultiByte(CP_UTF8, 0, Text, -1, Result.data(), Size, nullptr, nullptr);
     return Result;
 }
@@ -144,18 +137,18 @@ static std::string VariantToString(const VARIANT& Value)
     return {};
 }
 
-static uint64_t VariantToUInt64(const VARIANT& Value)
+static std::uint64_t VariantToUInt64(const VARIANT& Value)
 {
     if (Value.vt == VT_I8 || Value.vt == VT_UI8)
     {
-        return static_cast<uint64_t>(Value.ullVal);
+        return static_cast<std::uint64_t>(Value.ullVal);
     }
 
     std::string Text = VariantToString(Value);
     if (Text.empty()) return 0;
 
     char*    End  = nullptr;
-    uint64_t Size = std::strtoull(Text.c_str(), &End, 10);
+    std::uint64_t Size = std::strtoull(Text.c_str(), &End, 10);
     return End && *End == '\0' ? Size : 0;
 }
 
@@ -280,7 +273,7 @@ static std::string ReadWmiString(IWbemClassObject* Object, const wchar_t* Proper
     return Text;
 }
 
-static uint64_t ReadWmiUInt64(IWbemClassObject* Object, const wchar_t* Property)
+static std::uint64_t ReadWmiUInt64(IWbemClassObject* Object, const wchar_t* Property)
 {
     if (!Object || !Property) return 0;
 
@@ -293,7 +286,7 @@ static uint64_t ReadWmiUInt64(IWbemClassObject* Object, const wchar_t* Property)
         return 0;
     }
 
-    uint64_t Number = VariantToUInt64(Value);
+    std::uint64_t Number = VariantToUInt64(Value);
     VariantClear(&Value);
     return Number;
 }
@@ -329,7 +322,7 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
         Object->Release();
     }
 
-    uint64_t TotalSize = 0;
+    std::uint64_t TotalSize = 0;
     for (const DiskInfo& Disk : ValidDisks)
     {
         TotalSize += Disk.Size;
@@ -346,7 +339,7 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
     UniqueSerials.erase(std::unique(UniqueSerials.begin(), UniqueSerials.end()), UniqueSerials.end());
 
     std::string Serials;
-    for (size_t i = 0; i < UniqueSerials.size(); i++)
+    for (std::size_t i = 0; i < UniqueSerials.size(); i++)
     {
         if (i > 0) Serials += ",";
         Serials += UniqueSerials[i];
@@ -365,7 +358,7 @@ static bool BuildSha256Base64Url(std::string_view Text, std::string& Result)
     {
         auto Hasher = Botan::HashFunction::create_or_throw("SHA-256");
         Hasher->update(Text);
-        std::vector<uint8_t> Hash = Hasher->final_stdvec();
+        std::vector<std::uint8_t> Hash = Hasher->final_stdvec();
 
         Result = Botan::base64_encode(Hash.data(), Hash.size());
         for (char& Char : Result)

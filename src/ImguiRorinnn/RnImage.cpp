@@ -2,8 +2,6 @@
 
 module;
 
-#include <limits>
-#include <vector>
 
 #include <d3d11.h>
 #include <imgui.h>
@@ -11,6 +9,7 @@ module;
 #include <wrl/client.h>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {
@@ -60,7 +59,7 @@ static bool CreateTextureFromBitmap(ID3D11Device* Device, IWICBitmapSource* Bitm
     }
 
     const UINT           BufferSize = Stride * Height;
-    std::vector<uint8_t> Pixels(BufferSize);
+    std::vector<std::uint8_t> Pixels(BufferSize);
     if (FAILED(BitmapSource->CopyPixels(nullptr, Stride, BufferSize, Pixels.data())))
     {
         return false;
@@ -139,9 +138,9 @@ static bool CreateTextureFromDecoder(ID3D11Device* Device, IWICBitmapDecoder* De
 }
 } // namespace
 
-bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, size_t Size, ImageTexture& Texture)
+bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, std::size_t Size, ImageTexture& Texture)
 {
-    if (!Device || !Data || Size == 0 || Size > UINT32_MAX)
+    if (!Device || !Data || Size == 0 || Size > std::numeric_limits<std::uint32_t>::max())
     {
         return false;
     }

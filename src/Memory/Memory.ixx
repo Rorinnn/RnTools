@@ -1,19 +1,18 @@
 module;
 
-#include <cstddef>
-#include <cstdint>
 
 export module RorinnnTools:Memory;
+import std;
 
 export namespace RorinnnTools::Memory
 {
 
-bool ReadBytes(uintptr_t Ptr, void* PBuffer, size_t Size);
-bool IsReadablePtr(uintptr_t Ptr);
-bool IsReadableRange(uintptr_t Ptr, size_t Size);
-bool ReadPtr(uintptr_t Ptr, uintptr_t& Value);
+bool ReadBytes(std::uintptr_t Ptr, void* PBuffer, std::size_t Size);
+bool IsReadablePtr(std::uintptr_t Ptr);
+bool IsReadableRange(std::uintptr_t Ptr, std::size_t Size);
+bool ReadPtr(std::uintptr_t Ptr, std::uintptr_t& Value);
 
-template <typename T> bool ReadValue(uintptr_t Ptr, T& Value)
+template <typename T> bool ReadValue(std::uintptr_t Ptr, T& Value)
 {
     if (!ReadBytes(Ptr, &Value, sizeof(T)))
     {

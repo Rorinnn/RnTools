@@ -4,10 +4,9 @@ module;
 
 #include <Windows.h>
 
-#include <cstdlib>
-#include <cstring>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools
 {

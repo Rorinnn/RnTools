@@ -4,11 +4,9 @@ module;
 
 #include <Windows.h>
 
-#include <cstddef>
-#include <string>
-#include <unordered_map>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::Graphics
 {

@@ -2,13 +2,9 @@ module;
 
 #include <Windows.h>
 
-#include <cstdint>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 export module RorinnnTools:Graphics;
+import std;
 
 namespace RorinnnTools::Graphics::detail
 {
@@ -48,7 +44,7 @@ template <typename F> ScopeExit<F> MakeScopeExit(F Callback)
 export namespace RorinnnTools::Graphics
 {
 
-enum class LocateStatus : uint32_t
+enum class LocateStatus : std::uint32_t
 {
     Ok               = 0,
     Unknown          = 1,

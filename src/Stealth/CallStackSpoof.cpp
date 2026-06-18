@@ -5,12 +5,9 @@ module;
 #include <Windows.h>
 #include <Psapi.h>
 
-#include <algorithm>
-#include <cstring>
-#include <random>
-#include <vector>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::Stealth
 {
@@ -19,17 +16,17 @@ namespace RorinnnTools::Stealth
 #pragma pack(push, 1)
 struct SpoofShellcodeTemplate
 {
-    uint8_t  MovR11Imm1Op[2]; // 0x49, 0xBB          mov r11, imm64
-    uint64_t FirstXorKey;     // (运行时填充)
-    uint8_t  Pad1[56];        // xor / push / sub / lea / movsq / call / pop / add
-    uint8_t  MovR11Imm2Op[2];
-    uint64_t SecondXorKey;
-    uint8_t  Pad2[5]; // xor [rsp], r11; ret
+    std::uint8_t  MovR11Imm1Op[2]; // 0x49, 0xBB          mov r11, imm64
+    std::uint64_t FirstXorKey;     // (运行时填充)
+    std::uint8_t  Pad1[56];        // xor / push / sub / lea / movsq / call / pop / add
+    std::uint8_t  MovR11Imm2Op[2];
+    std::uint64_t SecondXorKey;
+    std::uint8_t  Pad2[5]; // xor [rsp], r11; ret
 };
 #pragma pack(pop)
 static_assert(sizeof(SpoofShellcodeTemplate) == 81, "Shellcode template size mismatch");
 
-static const uint8_t kSpoofShellcode[] = {
+static const std::uint8_t kSpoofShellcode[] = {
     // 1. 加密返回地址
     0x49,
     0xBB,
@@ -212,37 +209,37 @@ static HMODULE GetSelfModuleHandle()
 }
 
 // 用户态 .text 对齐填充以 0xCC (INT3) 为主, 0x00 较少; 都视为 cave.
-static bool IsPaddingByte(uint8_t V)
+static bool IsPaddingByte(std::uint8_t V)
 {
     return V == 0x00 || V == 0xCC;
 }
 
-static uint8_t* SearchCodeCaveInModule(HMODULE Module, size_t CaveSize)
+static std::uint8_t* SearchCodeCaveInModule(HMODULE Module, std::size_t CaveSize)
 {
     if (!Module || CaveSize == 0) return nullptr;
 
-    auto* Base = reinterpret_cast<uint8_t*>(Module);
+    auto* Base = reinterpret_cast<std::uint8_t*>(Module);
     auto* Dos  = reinterpret_cast<IMAGE_DOS_HEADER*>(Base);
     if (Dos->e_magic != IMAGE_DOS_SIGNATURE) return nullptr;
     auto* Nt = reinterpret_cast<IMAGE_NT_HEADERS64*>(Base + Dos->e_lfanew);
     if (Nt->Signature != IMAGE_NT_SIGNATURE) return nullptr;
 
     auto* Section = IMAGE_FIRST_SECTION(Nt);
-    for (uint16_t i = 0; i < Nt->FileHeader.NumberOfSections; ++i)
+    for (std::uint16_t i = 0; i < Nt->FileHeader.NumberOfSections; ++i)
     {
-        if (memcmp(Section[i].Name, ".text", 5) != 0) continue;
+        if (std::memcmp(Section[i].Name, ".text", 5) != 0) continue;
 
         DWORD Rva  = Section[i].VirtualAddress;
         DWORD Size = Section[i].Misc.VirtualSize;
         if (Size <= CaveSize) continue;
 
-        uint8_t* SectionStart = Base + Rva;
-        uint8_t* SearchEnd    = SectionStart + Size - CaveSize;
+        std::uint8_t* SectionStart = Base + Rva;
+        std::uint8_t* SearchEnd    = SectionStart + Size - CaveSize;
 
-        for (uint8_t* P = SectionStart; P <= SearchEnd; ++P)
+        for (std::uint8_t* P = SectionStart; P <= SearchEnd; ++P)
         {
             bool AllPadding = true;
-            for (size_t k = 0; k < CaveSize; ++k)
+            for (std::size_t k = 0; k < CaveSize; ++k)
             {
                 if (!IsPaddingByte(P[k]))
                 {
@@ -254,8 +251,8 @@ static uint8_t* SearchCodeCaveInModule(HMODULE Module, size_t CaveSize)
             if (!AllPadding) continue;
 
             // ShellCode 不能跨页
-            uintptr_t Start = reinterpret_cast<uintptr_t>(P);
-            uintptr_t End   = Start + CaveSize - 1;
+            std::uintptr_t Start = reinterpret_cast<std::uintptr_t>(P);
+            std::uintptr_t End   = Start + CaveSize - 1;
             if ((Start >> 12) != (End >> 12)) continue;
             return P;
         }
@@ -281,18 +278,18 @@ static bool EnumProcessModulesGrowing(HANDLE Proc, std::vector<HMODULE>& Modules
     return false;
 }
 
-static bool WriteShellcodeToCave(uint8_t* Dest, const uint8_t* Source, size_t Size)
+static bool WriteShellcodeToCave(std::uint8_t* Dest, const std::uint8_t* Source, std::size_t Size)
 {
     DWORD OldProtect = 0;
     if (!VirtualProtect(Dest, Size, PAGE_EXECUTE_READWRITE, &OldProtect)) return false;
-    memcpy(Dest, Source, Size);
+    std::memcpy(Dest, Source, Size);
     DWORD Tmp = 0;
     VirtualProtect(Dest, Size, OldProtect, &Tmp);
     FlushInstructionCache(GetCurrentProcess(), Dest, Size);
     return true;
 }
 
-bool CallStackSpoof::Init(uint64_t XorKey)
+bool CallStackSpoof::Init(std::uint64_t XorKey)
 {
     if (m_Trampoline != 0) return true;
     if (XorKey == 0) return false;
@@ -310,7 +307,7 @@ bool CallStackSpoof::Init(uint64_t XorKey)
     std::mt19937       Gen(Rd());
     std::shuffle(Modules.begin(), Modules.end(), Gen);
 
-    uint8_t* Slot = nullptr;
+    std::uint8_t* Slot = nullptr;
     for (HMODULE Mod : Modules)
     {
         if (Mod == Self) continue;
@@ -330,8 +327,8 @@ bool CallStackSpoof::Init(uint64_t XorKey)
         return false;
     }
 
-    uint8_t Buffer[sizeof(SpoofShellcodeTemplate)];
-    memcpy(Buffer, kSpoofShellcode, sizeof(Buffer));
+    std::uint8_t Buffer[sizeof(SpoofShellcodeTemplate)];
+    std::memcpy(Buffer, kSpoofShellcode, sizeof(Buffer));
     auto* Tpl         = reinterpret_cast<SpoofShellcodeTemplate*>(Buffer);
     Tpl->FirstXorKey  = XorKey;
     Tpl->SecondXorKey = XorKey;
@@ -341,7 +338,7 @@ bool CallStackSpoof::Init(uint64_t XorKey)
         return false;
     }
 
-    m_Trampoline = reinterpret_cast<uint64_t>(Slot);
+    m_Trampoline = reinterpret_cast<std::uint64_t>(Slot);
     return true;
 }
 

@@ -4,9 +4,9 @@ module;
 
 #include <Windows.h>
 
-#include <utility>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::Graphics::detail
 {

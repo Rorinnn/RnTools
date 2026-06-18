@@ -4,9 +4,9 @@ module;
 #include <d3d11.h>
 #include <imgui.h>
 
-#include <cstdint>
 
 export module RorinnnTools:ImguiRorinnn;
+import std;
 
 export namespace RorinnnTools::ImguiRorinnn
 {
@@ -340,7 +340,7 @@ const char* ToIconString(Icon Value);
 bool           LoadFonts(float TextSize = 16.0f, float IconSize = 15.0f);
 const FontSet& Fonts();
 
-bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, size_t Size, ImageTexture& Texture);
+bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, std::size_t Size, ImageTexture& Texture);
 bool CreateDx11TextureFromFile(ID3D11Device* Device, const wchar_t* Path, ImageTexture& Texture);
 void DestroyDx11Texture(ImageTexture& Texture);
 void Image(const ImageTexture& Texture,
@@ -431,7 +431,7 @@ bool SegmentedControl(const char*       Id,
                       int               ItemCount,
                       const ImVec2&     Size = ImVec2(0.0f, 0.0f));
 bool InputText(
-    const char* Label, char* Buffer, size_t BufferSize, const char* Hint = nullptr, ImGuiInputTextFlags Flags = 0);
+    const char* Label, char* Buffer, std::size_t BufferSize, const char* Hint = nullptr, ImGuiInputTextFlags Flags = 0);
 bool InputInt(const char* Label, int* Value);
 bool InputFloat(const char* Label, float* Value, const char* Format = "%.3f");
 void ProgressBar(const char*   Id,

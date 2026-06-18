@@ -8,7 +8,7 @@ module RorinnnTools;
 
 namespace RorinnnTools::Input
 {
-static constexpr size_t MaxChordKeys = 8;
+static constexpr std::size_t MaxChordKeys = 8;
 
 static bool SendVirtualKey(WORD VirtualKey, bool Down)
 {
@@ -33,14 +33,14 @@ bool TapVirtualKey(WORD VirtualKey, DWORD PressMs)
     return TapVirtualKeyChord(&VirtualKey, 1, PressMs);
 }
 
-bool TapVirtualKeyChord(const WORD* PVirtualKeys, size_t Count, DWORD PressMs)
+bool TapVirtualKeyChord(const WORD* PVirtualKeys, std::size_t Count, DWORD PressMs)
 {
     if (!PVirtualKeys || Count == 0 || Count > MaxChordKeys)
     {
         return false;
     }
 
-    for (size_t i = 0; i < Count; i++)
+    for (std::size_t i = 0; i < Count; i++)
     {
         if (!PVirtualKeys[i])
         {
@@ -48,11 +48,11 @@ bool TapVirtualKeyChord(const WORD* PVirtualKeys, size_t Count, DWORD PressMs)
         }
     }
 
-    for (size_t i = 0; i < Count; i++)
+    for (std::size_t i = 0; i < Count; i++)
     {
         if (!SendVirtualKey(PVirtualKeys[i], true))
         {
-            for (size_t j = i; j > 0; j--)
+            for (std::size_t j = i; j > 0; j--)
             {
                 SendVirtualKey(PVirtualKeys[j - 1], false);
             }
@@ -66,7 +66,7 @@ bool TapVirtualKeyChord(const WORD* PVirtualKeys, size_t Count, DWORD PressMs)
     }
 
     bool Released = true;
-    for (size_t i = Count; i > 0; i--)
+    for (std::size_t i = Count; i > 0; i--)
     {
         Released = SendVirtualKey(PVirtualKeys[i - 1], false) && Released;
     }

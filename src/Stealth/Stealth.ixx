@@ -1,8 +1,8 @@
 module;
 
-#include <cstdint>
 
 export module RorinnnTools:Stealth;
+import std;
 
 export namespace RorinnnTools::Stealth
 {
@@ -12,9 +12,9 @@ class CallStackSpoof
   public:
     CallStackSpoof() = default;
 
-    bool Init(uint64_t XorKey);
+    bool Init(std::uint64_t XorKey);
 
-    uint64_t GetTrampoline() const
+    std::uint64_t GetTrampoline() const
     {
         return m_Trampoline;
     }
@@ -24,12 +24,12 @@ class CallStackSpoof
         return m_Trampoline != 0;
     }
 
-    template <typename RetT = uint64_t,
+    template <typename RetT = std::uint64_t,
               typename... Args,
-              typename T1 = uint64_t,
-              typename T2 = uint64_t,
-              typename T3 = uint64_t,
-              typename T4 = uint64_t>
+              typename T1 = std::uint64_t,
+              typename T2 = std::uint64_t,
+              typename T3 = std::uint64_t,
+              typename T4 = std::uint64_t>
     RetT Invoke(void* Func, T1 A1 = {}, T2 A2 = {}, T3 A3 = {}, T4 A4 = {}, Args... Rest) const
     {
         if (m_Trampoline == 0)
@@ -41,7 +41,7 @@ class CallStackSpoof
     }
 
   private:
-    uint64_t m_Trampoline = 0;
+    std::uint64_t m_Trampoline = 0;
 };
 
 template <class Ret, class... Args> Ret SpoofRetType(Ret (*)(Args...));

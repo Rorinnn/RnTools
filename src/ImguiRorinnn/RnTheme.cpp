@@ -2,11 +2,11 @@
 
 module;
 
-#include <algorithm>
 
 #include <imgui.h>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {

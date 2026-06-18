@@ -2,11 +2,9 @@ module;
 
 #include <Windows.h>
 
-#include <cstddef>
-#include <cstdint>
-#include <functional>
 
 export module RorinnnTools:Hook;
+import std;
 
 export namespace RorinnnTools::Hook::VTable
 {
@@ -58,8 +56,8 @@ struct VehHookOptions
     void*           RedirectAddress = nullptr;
     VehHookType     Type            = VehHookType::Int3;
     VehHookCallback Callback        = {};
-    const uint8_t*  TrampolineBytes = nullptr;
-    size_t          TrampolineSize  = 0;
+    const std::uint8_t*  TrampolineBytes = nullptr;
+    std::size_t          TrampolineSize  = 0;
 };
 
 VehHookStatus InstallVehHookHandler();
@@ -70,7 +68,7 @@ VehHookStatus AddVehHook(const VehHookOptions& Options);
 VehHookStatus RemoveVehHook(int Token);
 VehHookStatus RemoveAllVehHooks();
 VehHookStatus RefreshHardwareVehHooks();
-size_t        GetVehHookCount();
+std::size_t        GetVehHookCount();
 
 const char* GetVehHookStatusName(VehHookStatus Status);
 

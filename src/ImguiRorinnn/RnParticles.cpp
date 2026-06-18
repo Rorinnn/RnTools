@@ -2,19 +2,17 @@
 
 module;
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
 
 #include <imgui.h>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {
 namespace
 {
-static uint32_t Hash(uint32_t Value)
+static std::uint32_t Hash(std::uint32_t Value)
 {
     Value ^= Value >> 16;
     Value *= 0x7FEB352Du;
@@ -24,7 +22,7 @@ static uint32_t Hash(uint32_t Value)
     return Value;
 }
 
-static float UnitFloat(uint32_t Value)
+static float UnitFloat(std::uint32_t Value)
 {
     return static_cast<float>(Hash(Value) & 0x00FFFFFFu) / 16777215.0f;
 }
@@ -101,7 +99,7 @@ void DrawSnowflakes(const char* Id, const ImVec2& Min, const ImVec2& Max, const 
     DrawList->PushClipRect(Min, Max, true);
     for (int Index = 0; Index < Options.Count; Index++)
     {
-        const uint32_t Seed         = Hash(static_cast<uint32_t>(BaseId) ^ static_cast<uint32_t>(Index * 977u + 17u));
+        const std::uint32_t Seed         = Hash(static_cast<std::uint32_t>(BaseId) ^ static_cast<std::uint32_t>(Index * 977u + 17u));
         const float    Radius       = Lerp(MinRadius, MaxRadius, UnitFloat(Seed + 1u));
         const float    Speed        = Lerp(MinSpeed, MaxSpeed, UnitFloat(Seed + 2u));
         const float    Phase        = UnitFloat(Seed + 3u) * 6.2831853f;

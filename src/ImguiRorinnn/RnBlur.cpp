@@ -6,9 +6,9 @@ module;
 #include <d3dcompiler.h>
 #include <imgui.h>
 
-#include <algorithm>
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {

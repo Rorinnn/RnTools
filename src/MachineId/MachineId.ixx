@@ -1,8 +1,8 @@
 module;
 
-#include <string>
 
 export module RorinnnTools:MachineId;
+import std;
 
 export namespace RorinnnTools
 {

@@ -2,10 +2,6 @@
 
 module;
 
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <vector>
 
 #include <imgui_internal.h>
 
@@ -15,6 +11,7 @@ module;
 #endif
 
 module RorinnnTools;
+import std;
 
 namespace RorinnnTools::ImguiRorinnn
 {
@@ -825,7 +822,7 @@ bool SegmentedControl(const char* Id, int* CurrentItem, const char* const Items[
     return Changed;
 }
 
-bool InputText(const char* Label, char* Buffer, size_t BufferSize, const char* Hint, ImGuiInputTextFlags Flags)
+bool InputText(const char* Label, char* Buffer, std::size_t BufferSize, const char* Hint, ImGuiInputTextFlags Flags)
 {
     StyleColorScope ColorScope;
     StyleVarScope   VarScope;
