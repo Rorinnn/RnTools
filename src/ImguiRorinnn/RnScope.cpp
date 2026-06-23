@@ -27,7 +27,8 @@ StyleColorScope::StyleColorScope(StyleColorScope&& Other) noexcept
 
 StyleColorScope& StyleColorScope::operator=(StyleColorScope&& Other) noexcept
 {
-    if (this == &Other) return *this;
+    if (this == &Other)
+        return *this;
     Pop();
     Count       = Other.Count;
     Other.Count = 0;
@@ -42,7 +43,8 @@ void StyleColorScope::Push(ImGuiCol Index, const ImVec4& Color)
 
 void StyleColorScope::Pop()
 {
-    if (Count <= 0) return;
+    if (Count <= 0)
+        return;
     ImGui::PopStyleColor(Count);
     Count = 0;
 }
@@ -70,7 +72,8 @@ StyleVarScope::StyleVarScope(StyleVarScope&& Other) noexcept
 
 StyleVarScope& StyleVarScope::operator=(StyleVarScope&& Other) noexcept
 {
-    if (this == &Other) return *this;
+    if (this == &Other)
+        return *this;
     Pop();
     Count       = Other.Count;
     Other.Count = 0;
@@ -91,21 +94,24 @@ void StyleVarScope::Push(ImGuiStyleVar Index, const ImVec2& Value)
 
 void StyleVarScope::Pop()
 {
-    if (Count <= 0) return;
+    if (Count <= 0)
+        return;
     ImGui::PopStyleVar(Count);
     Count = 0;
 }
 
 DisabledScope::DisabledScope(bool Disabled)
 {
-    if (!Disabled) return;
+    if (!Disabled)
+        return;
     Active = true;
     ImGui::BeginDisabled(true);
 }
 
 DisabledScope::~DisabledScope()
 {
-    if (!Active) return;
+    if (!Active)
+        return;
     ImGui::EndDisabled();
 }
 

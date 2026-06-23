@@ -192,7 +192,8 @@ static bool IsForbiddenHostName(const char* BaseName)
     };
     for (const char* Name : kBlacklist)
     {
-        if (_stricmp(BaseName, Name) == 0) return true;
+        if (_stricmp(BaseName, Name) == 0)
+            return true;
     }
     return false;
 }
@@ -215,22 +216,27 @@ static bool IsPaddingByte(std::uint8_t V)
 
 static std::uint8_t* SearchCodeCaveInModule(HMODULE Module, std::size_t CaveSize)
 {
-    if (!Module || CaveSize == 0) return nullptr;
+    if (!Module || CaveSize == 0)
+        return nullptr;
 
     auto* Base = reinterpret_cast<std::uint8_t*>(Module);
     auto* Dos  = reinterpret_cast<IMAGE_DOS_HEADER*>(Base);
-    if (Dos->e_magic != IMAGE_DOS_SIGNATURE) return nullptr;
+    if (Dos->e_magic != IMAGE_DOS_SIGNATURE)
+        return nullptr;
     auto* Nt = reinterpret_cast<IMAGE_NT_HEADERS64*>(Base + Dos->e_lfanew);
-    if (Nt->Signature != IMAGE_NT_SIGNATURE) return nullptr;
+    if (Nt->Signature != IMAGE_NT_SIGNATURE)
+        return nullptr;
 
     auto* Section = IMAGE_FIRST_SECTION(Nt);
     for (std::uint16_t i = 0; i < Nt->FileHeader.NumberOfSections; ++i)
     {
-        if (std::memcmp(Section[i].Name, ".text", 5) != 0) continue;
+        if (std::memcmp(Section[i].Name, ".text", 5) != 0)
+            continue;
 
         DWORD Rva  = Section[i].VirtualAddress;
         DWORD Size = Section[i].Misc.VirtualSize;
-        if (Size <= CaveSize) continue;
+        if (Size <= CaveSize)
+            continue;
 
         std::uint8_t* SectionStart = Base + Rva;
         std::uint8_t* SearchEnd    = SectionStart + Size - CaveSize;
@@ -247,12 +253,14 @@ static std::uint8_t* SearchCodeCaveInModule(HMODULE Module, std::size_t CaveSize
                     break;
                 }
             }
-            if (!AllPadding) continue;
+            if (!AllPadding)
+                continue;
 
             // ShellCode 不能跨页
             std::uintptr_t Start = reinterpret_cast<std::uintptr_t>(P);
             std::uintptr_t End   = Start + CaveSize - 1;
-            if ((Start >> 12) != (End >> 12)) continue;
+            if ((Start >> 12) != (End >> 12))
+                continue;
             return P;
         }
     }
@@ -266,7 +274,8 @@ static bool EnumProcessModulesGrowing(HANDLE Proc, std::vector<HMODULE>& Modules
     {
         DWORD BufBytes = static_cast<DWORD>(Modules.size() * sizeof(HMODULE));
         DWORD Needed   = 0;
-        if (!K32EnumProcessModules(Proc, Modules.data(), BufBytes, &Needed)) return false;
+        if (!K32EnumProcessModules(Proc, Modules.data(), BufBytes, &Needed))
+            return false;
         if (Needed <= BufBytes)
         {
             Modules.resize(Needed / sizeof(HMODULE));
@@ -280,7 +289,8 @@ static bool EnumProcessModulesGrowing(HANDLE Proc, std::vector<HMODULE>& Modules
 static bool WriteShellcodeToCave(std::uint8_t* Dest, const std::uint8_t* Source, std::size_t Size)
 {
     DWORD OldProtect = 0;
-    if (!VirtualProtect(Dest, Size, PAGE_EXECUTE_READWRITE, &OldProtect)) return false;
+    if (!VirtualProtect(Dest, Size, PAGE_EXECUTE_READWRITE, &OldProtect))
+        return false;
     std::memcpy(Dest, Source, Size);
     DWORD Tmp = 0;
     VirtualProtect(Dest, Size, OldProtect, &Tmp);
@@ -290,8 +300,10 @@ static bool WriteShellcodeToCave(std::uint8_t* Dest, const std::uint8_t* Source,
 
 bool CallStackSpoof::Init(std::uint64_t XorKey)
 {
-    if (m_Trampoline != 0) return true;
-    if (XorKey == 0) return false;
+    if (m_Trampoline != 0)
+        return true;
+    if (XorKey == 0)
+        return false;
 
     HMODULE Self = GetSelfModuleHandle();
 
@@ -309,10 +321,13 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
     std::uint8_t* Slot = nullptr;
     for (HMODULE Mod : Modules)
     {
-        if (Mod == Self) continue;
+        if (Mod == Self)
+            continue;
         char Name[MAX_PATH] = {};
-        if (K32GetModuleBaseNameA(Proc, Mod, Name, MAX_PATH) == 0) continue;
-        if (IsForbiddenHostName(Name)) continue;
+        if (K32GetModuleBaseNameA(Proc, Mod, Name, MAX_PATH) == 0)
+            continue;
+        if (IsForbiddenHostName(Name))
+            continue;
 
         Slot = SearchCodeCaveInModule(Mod, sizeof(SpoofShellcodeTemplate));
         if (Slot)

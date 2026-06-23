@@ -155,7 +155,8 @@ static float CalcButtonAutoWidth(const char* Label)
 
 static bool HasVisibleLabel(const char* Label)
 {
-    if (!Label) return false;
+    if (!Label)
+        return false;
     return Label[0] != '#' || Label[1] != '#';
 }
 
@@ -638,7 +639,8 @@ bool Checkbox(const char* Label, bool* Value)
 bool Toggle(const char* Label, bool* Value)
 {
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
-    if (Window->SkipItems) return false;
+    if (Window->SkipItems)
+        return false;
 
     const ColorTokens& C          = Colors();
     const SizeTokens&  S          = Sizes();
@@ -651,7 +653,8 @@ bool Toggle(const char* Label, bool* Value)
     const ImRect       Bounds(Pos, ImVec2(Pos.x + TotalWidth, Pos.y + ImMax(Height, LabelSize.y)));
 
     ImGui::ItemSize(Bounds);
-    if (!ImGui::ItemAdd(Bounds, Id)) return false;
+    if (!ImGui::ItemAdd(Bounds, Id))
+        return false;
 
     bool       Hovered = false;
     bool       Held    = false;

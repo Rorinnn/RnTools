@@ -26,33 +26,40 @@ using D3D12CreateDevice_t = HRESULT(WINAPI*)(IUnknown*         Adapter,
 LocateStatus LocateD3D12(D3D12Methods& Out)
 {
     HMODULE DxgiModule = GetModuleHandleA("dxgi.dll");
-    if (!DxgiModule) return LocateStatus::ModuleNotFound;
+    if (!DxgiModule)
+        return LocateStatus::ModuleNotFound;
 
     HMODULE D3D12Module = GetModuleHandleA("d3d12.dll");
-    if (!D3D12Module) return LocateStatus::ModuleNotFound;
+    if (!D3D12Module)
+        return LocateStatus::ModuleNotFound;
 
     auto CreateDXGIFactoryFn = reinterpret_cast<CreateDXGIFactory_t>(GetProcAddress(DxgiModule, "CreateDXGIFactory"));
-    if (!CreateDXGIFactoryFn) return LocateStatus::MethodNotFound;
+    if (!CreateDXGIFactoryFn)
+        return LocateStatus::MethodNotFound;
 
     IDXGIFactory* Factory;
     HRESULT       HResult = CreateDXGIFactoryFn(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&Factory));
-    if (HResult != S_OK) return LocateStatus::D3D12CreateDXGIFactoryFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateDXGIFactoryFailed;
     auto FactoryGuard = detail::MakeScopeExit([&]()
                                               { Factory->Release(); });
 
     IDXGIAdapter* Adapter;
     HResult = Factory->EnumAdapters(0, &Adapter);
-    if (HResult != S_OK) return LocateStatus::D3D12EnumAdaptersFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12EnumAdaptersFailed;
     auto AdapterGuard = detail::MakeScopeExit([&]()
                                               { Adapter->Release(); });
 
     auto D3D12CreateDeviceFn = reinterpret_cast<D3D12CreateDevice_t>(GetProcAddress(D3D12Module, "D3D12CreateDevice"));
-    if (!D3D12CreateDeviceFn) return LocateStatus::MethodNotFound;
+    if (!D3D12CreateDeviceFn)
+        return LocateStatus::MethodNotFound;
 
     ID3D12Device* Device;
     HResult =
         D3D12CreateDeviceFn(Adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), reinterpret_cast<void**>(&Device));
-    if (HResult != S_OK) return LocateStatus::D3D12CreateDeviceFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateDeviceFailed;
     auto DeviceGuard = detail::MakeScopeExit([&]()
                                              { Device->Release(); });
 
@@ -63,14 +70,16 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
     ID3D12CommandQueue* CommandQueue;
     HResult = Device->CreateCommandQueue(
         &CommandQueueDesc, __uuidof(ID3D12CommandQueue), reinterpret_cast<void**>(&CommandQueue));
-    if (HResult != S_OK) return LocateStatus::D3D12CreateCommandQueueFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateCommandQueueFailed;
     auto CommandQueueGuard = detail::MakeScopeExit([&]()
                                                    { CommandQueue->Release(); });
 
     ID3D12CommandAllocator* CommandAllocator;
     HResult = Device->CreateCommandAllocator(
         D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), reinterpret_cast<void**>(&CommandAllocator));
-    if (HResult != S_OK) return LocateStatus::D3D12CreateCommandAllocatorFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateCommandAllocatorFailed;
     auto CommandAllocatorGuard = detail::MakeScopeExit([&]()
                                                        { CommandAllocator->Release(); });
 
@@ -81,7 +90,8 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
                                         nullptr,
                                         __uuidof(ID3D12GraphicsCommandList),
                                         reinterpret_cast<void**>(&CommandList));
-    if (HResult != S_OK) return LocateStatus::D3D12CreateCommandListFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateCommandListFailed;
     auto CommandListGuard = detail::MakeScopeExit([&]()
                                                   { CommandList->Release(); });
 
@@ -106,14 +116,16 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
 
     IDXGISwapChain* SwapChain;
     HResult = Factory->CreateSwapChain(CommandQueue, &SwapChainDesc, &SwapChain);
-    if (HResult != S_OK) return LocateStatus::D3D12CreateSwapChainFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D12CreateSwapChainFailed;
     auto SwapChainGuard = detail::MakeScopeExit([&]()
                                                 { SwapChain->Release(); });
 
     for (auto VTable = *reinterpret_cast<void***>(Device); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.DeviceMethods.push_back({VTable, Ptr});
     }
@@ -121,7 +133,8 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(CommandQueue); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.CommandQueueMethods.push_back({VTable, Ptr});
     }
@@ -129,7 +142,8 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(CommandAllocator); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.CommandAllocatorMethods.push_back({VTable, Ptr});
     }
@@ -137,7 +151,8 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(CommandList); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.CommandListMethods.push_back({VTable, Ptr});
     }
@@ -145,7 +160,8 @@ LocateStatus LocateD3D12(D3D12Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(SwapChain); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.SwapChainMethods.push_back({VTable, Ptr});
     }

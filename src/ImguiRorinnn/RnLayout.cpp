@@ -40,8 +40,10 @@ static ImGuiID ChildId(ImGuiID Id, const char* Name)
 
 static float Saturate(float Value)
 {
-    if (Value < 0.0f) return 0.0f;
-    if (Value > 1.0f) return 1.0f;
+    if (Value < 0.0f)
+        return 0.0f;
+    if (Value > 1.0f)
+        return 1.0f;
     return Value;
 }
 
@@ -300,7 +302,8 @@ bool BeginModule(const char* Id, const char* Name, const ModuleHeaderOptions& Op
     const ColorTokens& C      = Colors();
     const SizeTokens&  S      = Sizes();
     ImGuiWindow*       Window = ImGui::GetCurrentWindow();
-    if (Window->SkipItems) return false;
+    if (Window->SkipItems)
+        return false;
 
     ImGui::PushID(Id);
 

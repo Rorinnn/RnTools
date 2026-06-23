@@ -30,29 +30,35 @@ using D3D10CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(IDXGIAdapter*         A
 LocateStatus LocateD3D10(D3D10Methods& Out)
 {
     HMODULE DxgiModule = GetModuleHandleA("dxgi.dll");
-    if (!DxgiModule) return LocateStatus::ModuleNotFound;
+    if (!DxgiModule)
+        return LocateStatus::ModuleNotFound;
 
     HMODULE D3D10Module = GetModuleHandleA("d3d10.dll");
-    if (!D3D10Module) return LocateStatus::ModuleNotFound;
+    if (!D3D10Module)
+        return LocateStatus::ModuleNotFound;
 
     auto CreateDXGIFactoryFn = reinterpret_cast<CreateDXGIFactory_t>(GetProcAddress(DxgiModule, "CreateDXGIFactory"));
-    if (!CreateDXGIFactoryFn) return LocateStatus::MethodNotFound;
+    if (!CreateDXGIFactoryFn)
+        return LocateStatus::MethodNotFound;
 
     IDXGIFactory* Factory = nullptr;
     HRESULT       HResult = CreateDXGIFactoryFn(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&Factory));
-    if (HResult != S_OK) return LocateStatus::D3D10CreateDXGIFactoryFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D10CreateDXGIFactoryFailed;
     auto FactoryGuard = detail::MakeScopeExit([&]()
                                               { Factory->Release(); });
 
     IDXGIAdapter* Adapter;
     HResult = Factory->EnumAdapters(0, &Adapter);
-    if (HResult != S_OK) return LocateStatus::D3D10EnumAdaptersFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D10EnumAdaptersFailed;
     auto AdapterGuard = detail::MakeScopeExit([&]()
                                               { Adapter->Release(); });
 
     auto D3D10CreateDeviceAndSwapChainFn =
         reinterpret_cast<D3D10CreateDeviceAndSwapChain_t>(GetProcAddress(D3D10Module, "D3D10CreateDeviceAndSwapChain"));
-    if (!D3D10CreateDeviceAndSwapChainFn) return LocateStatus::MethodNotFound;
+    if (!D3D10CreateDeviceAndSwapChainFn)
+        return LocateStatus::MethodNotFound;
 
     detail::DummyWin32Window Window{};
     detail::CreateDummyWin32Window(Window);
@@ -76,7 +82,8 @@ LocateStatus LocateD3D10(D3D10Methods& Out)
     ID3D10Device*   Device;
     HResult = D3D10CreateDeviceAndSwapChainFn(
         Adapter, D3D10_DRIVER_TYPE_HARDWARE, nullptr, 0, D3D10_SDK_VERSION, &SwapChainDesc, &SwapChain, &Device);
-    if (HResult != S_OK) return LocateStatus::D3D10DeviceCreateFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D10DeviceCreateFailed;
     auto CreatedObjectsGuard = detail::MakeScopeExit(
         [&]()
         {
@@ -87,7 +94,8 @@ LocateStatus LocateD3D10(D3D10Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(SwapChain); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.SwapChainMethods.push_back({VTable, Ptr});
     }
@@ -95,7 +103,8 @@ LocateStatus LocateD3D10(D3D10Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(Device); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.DeviceMethods.push_back({VTable, Ptr});
     }

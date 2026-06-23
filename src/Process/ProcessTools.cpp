@@ -12,13 +12,15 @@ namespace RorinnnTools
 
 DWORD GetProcessIdByName(const wchar_t* Name)
 {
-    if (!Name || Name[0] == L'\0') return 0;
+    if (!Name || Name[0] == L'\0')
+        return 0;
 
     PROCESSENTRY32W Entry{};
     Entry.dwSize = sizeof(Entry);
 
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (Snapshot == INVALID_HANDLE_VALUE) return 0;
+    if (Snapshot == INVALID_HANDLE_VALUE)
+        return 0;
 
     DWORD Result = 0;
     if (Process32FirstW(Snapshot, &Entry))
@@ -40,7 +42,8 @@ DWORD GetProcessIdByName(const wchar_t* Name)
 bool IsCorrectTargetArchitecture(HANDLE Process)
 {
     BOOL TargetWow64 = FALSE;
-    if (!IsWow64Process(Process, &TargetWow64)) return false;
+    if (!IsWow64Process(Process, &TargetWow64))
+        return false;
 
     BOOL HostWow64 = FALSE;
     IsWow64Process(GetCurrentProcess(), &HostWow64);

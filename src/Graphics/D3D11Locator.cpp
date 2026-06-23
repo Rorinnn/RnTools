@@ -34,29 +34,35 @@ using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(IDXGIAdapter*          
 LocateStatus LocateD3D11(D3D11Methods& Out)
 {
     HMODULE DxgiModule = GetModuleHandleA("dxgi.dll");
-    if (!DxgiModule) return LocateStatus::ModuleNotFound;
+    if (!DxgiModule)
+        return LocateStatus::ModuleNotFound;
 
     HMODULE D3D11Module = GetModuleHandleA("d3d11.dll");
-    if (!D3D11Module) return LocateStatus::ModuleNotFound;
+    if (!D3D11Module)
+        return LocateStatus::ModuleNotFound;
 
     auto CreateDXGIFactoryFn = reinterpret_cast<CreateDXGIFactory_t>(GetProcAddress(DxgiModule, "CreateDXGIFactory"));
-    if (!CreateDXGIFactoryFn) return LocateStatus::MethodNotFound;
+    if (!CreateDXGIFactoryFn)
+        return LocateStatus::MethodNotFound;
 
     IDXGIFactory* Factory;
     HRESULT       HResult = CreateDXGIFactoryFn(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&Factory));
-    if (HResult != S_OK) return LocateStatus::D3D11CreateDXGIFactoryFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D11CreateDXGIFactoryFailed;
     auto FactoryGuard = detail::MakeScopeExit([&]()
                                               { Factory->Release(); });
 
     IDXGIAdapter* Adapter;
     HResult = Factory->EnumAdapters(0, &Adapter);
-    if (HResult != S_OK) return LocateStatus::D3D11EnumAdaptersFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D11EnumAdaptersFailed;
     auto AdapterGuard = detail::MakeScopeExit([&]()
                                               { Adapter->Release(); });
 
     auto D3D11CreateDeviceAndSwapChainFn =
         reinterpret_cast<D3D11CreateDeviceAndSwapChain_t>(GetProcAddress(D3D11Module, "D3D11CreateDeviceAndSwapChain"));
-    if (!D3D11CreateDeviceAndSwapChainFn) return LocateStatus::MethodNotFound;
+    if (!D3D11CreateDeviceAndSwapChainFn)
+        return LocateStatus::MethodNotFound;
 
     detail::DummyWin32Window Window{};
     detail::CreateDummyWin32Window(Window);
@@ -100,7 +106,8 @@ LocateStatus LocateD3D11(D3D11Methods& Out)
                                               &Device,
                                               &FeatureLevel,
                                               &Context);
-    if (HResult != S_OK) return LocateStatus::D3D11CreateDeviceAndSwapChainFailed;
+    if (HResult != S_OK)
+        return LocateStatus::D3D11CreateDeviceAndSwapChainFailed;
     auto CreatedObjectsGuard = detail::MakeScopeExit(
         [&]()
         {
@@ -112,7 +119,8 @@ LocateStatus LocateD3D11(D3D11Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(SwapChain); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.SwapChainMethods.push_back({VTable, Ptr});
     }
@@ -120,7 +128,8 @@ LocateStatus LocateD3D11(D3D11Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(Device); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.DeviceMethods.push_back({VTable, Ptr});
     }
@@ -128,7 +137,8 @@ LocateStatus LocateD3D11(D3D11Methods& Out)
     for (auto VTable = *reinterpret_cast<void***>(Context); VTable; VTable++)
     {
         void* Ptr = *VTable;
-        if (!Ptr) break;
+        if (!Ptr)
+            break;
 
         Out.ContextMethods.push_back({VTable, Ptr});
     }

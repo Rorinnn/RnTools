@@ -157,7 +157,8 @@ static constexpr const char* VulkanMethodNames[] = {
 LocateStatus LocateVulkan(VulkanMethods& Out)
 {
     HMODULE VulkanModule = GetModuleHandleA("vulkan-1.dll");
-    if (!VulkanModule) return LocateStatus::ModuleNotFound;
+    if (!VulkanModule)
+        return LocateStatus::ModuleNotFound;
 
     for (const char* Name : VulkanMethodNames)
     {

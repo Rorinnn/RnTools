@@ -36,7 +36,8 @@ class ComScope
     ComScope()
     {
         Result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-        if (FAILED(Result)) return;
+        if (FAILED(Result))
+            return;
 
         SecurityResult = CoInitializeSecurity(nullptr,
                                               -1,
@@ -109,10 +110,12 @@ static std::string Trim(std::string Value)
 
 static std::string ToUtf8(const wchar_t* Text)
 {
-    if (!Text || Text[0] == L'\0') return {};
+    if (!Text || Text[0] == L'\0')
+        return {};
 
     int Size = WideCharToMultiByte(CP_UTF8, 0, Text, -1, nullptr, 0, nullptr, nullptr);
-    if (Size <= 1) return {};
+    if (Size <= 1)
+        return {};
 
     std::string Result(static_cast<std::size_t>(Size - 1), '\0');
     WideCharToMultiByte(CP_UTF8, 0, Text, -1, Result.data(), Size, nullptr, nullptr);
@@ -146,7 +149,8 @@ static std::uint64_t VariantToUInt64(const VARIANT& Value)
     }
 
     std::string Text = VariantToString(Value);
-    if (Text.empty()) return 0;
+    if (Text.empty())
+        return 0;
 
     char*         End  = nullptr;
     std::uint64_t Size = std::strtoull(Text.c_str(), &End, 10);
@@ -168,7 +172,8 @@ static std::string NormalizeSerial(std::string Value)
 static bool IsValidSerialNumber(const std::string& SerialNumber)
 {
     const std::string Value = NormalizeSerial(SerialNumber);
-    if (Value.size() < 3) return false;
+    if (Value.size() < 3)
+        return false;
 
     static const char* InvalidValues[] = {
         "0000_0000_0000_0000_0000_0000_0000_0000",
@@ -183,7 +188,8 @@ static bool IsValidSerialNumber(const std::string& SerialNumber)
 
     for (const char* Invalid : InvalidValues)
     {
-        if (Value == Invalid) return false;
+        if (Value == Invalid)
+            return false;
     }
 
     return std::any_of(
@@ -231,7 +237,8 @@ static bool ConnectWmi(IWbemServices*& Services)
 static std::vector<IWbemClassObject*> ExecuteWmiQuery(IWbemServices* Services, const wchar_t* Query)
 {
     std::vector<IWbemClassObject*> Objects;
-    if (!Services || !Query) return Objects;
+    if (!Services || !Query)
+        return Objects;
 
     IEnumWbemClassObject* Enumerator = nullptr;
     HRESULT               Result     = Services->ExecQuery(
@@ -260,7 +267,8 @@ static std::vector<IWbemClassObject*> ExecuteWmiQuery(IWbemServices* Services, c
 
 static std::string ReadWmiString(IWbemClassObject* Object, const wchar_t* Property)
 {
-    if (!Object || !Property) return {};
+    if (!Object || !Property)
+        return {};
 
     VARIANT Value{};
     VariantInit(&Value);
@@ -278,7 +286,8 @@ static std::string ReadWmiString(IWbemClassObject* Object, const wchar_t* Proper
 
 static std::uint64_t ReadWmiUInt64(IWbemClassObject* Object, const wchar_t* Property)
 {
-    if (!Object || !Property) return 0;
+    if (!Object || !Property)
+        return 0;
 
     VARIANT Value{};
     VariantInit(&Value);
@@ -297,7 +306,8 @@ static std::uint64_t ReadWmiUInt64(IWbemClassObject* Object, const wchar_t* Prop
 static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Query)
 {
     std::vector<IWbemClassObject*> Objects = ExecuteWmiQuery(Services, Query.Query);
-    if (Objects.empty()) return "Unknown";
+    if (Objects.empty())
+        return "Unknown";
 
     if (Query.UseFirstOnly)
     {
@@ -344,7 +354,8 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
     std::string Serials;
     for (std::size_t i = 0; i < UniqueSerials.size(); i++)
     {
-        if (i > 0) Serials += ",";
+        if (i > 0)
+            Serials += ",";
         Serials += UniqueSerials[i];
     }
 

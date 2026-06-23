@@ -358,7 +358,8 @@ static constexpr const char* OpenGLMethodNames[] = {
 LocateStatus LocateOpenGL(OpenGLMethods& Out)
 {
     HMODULE OpenGLModule = GetModuleHandleA("opengl32.dll");
-    if (!OpenGLModule) return LocateStatus::ModuleNotFound;
+    if (!OpenGLModule)
+        return LocateStatus::ModuleNotFound;
 
     for (const char* Name : OpenGLMethodNames)
     {

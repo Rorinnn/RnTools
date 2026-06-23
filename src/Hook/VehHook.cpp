@@ -88,7 +88,8 @@ static bool IsKnownType(VehHookType Type)
 
 static bool ReadMemoryBytes(void* PAddress, void* PBuffer, std::size_t Size)
 {
-    if (!PAddress || !PBuffer || Size == 0) return false;
+    if (!PAddress || !PBuffer || Size == 0)
+        return false;
 
     __try
     {
@@ -103,7 +104,8 @@ static bool ReadMemoryBytes(void* PAddress, void* PBuffer, std::size_t Size)
 
 static bool WriteMemoryBytes(void* PAddress, const void* PData, std::size_t Size)
 {
-    if (!PAddress || !PData || Size == 0) return false;
+    if (!PAddress || !PData || Size == 0)
+        return false;
 
     DWORD OldProtection = 0;
     if (!VirtualProtect(PAddress, Size, PAGE_EXECUTE_READWRITE, &OldProtection))
@@ -145,7 +147,8 @@ static VehHookStatus BuildTrampoline(VehHookRecord& Record)
 {
     const std::size_t PrefixSize = Record.TrampolineBytes.size();
     const std::size_t TotalSize  = PrefixSize + AbsoluteJumpSize;
-    if (TotalSize <= AbsoluteJumpSize && !Record.RedirectAddress) return VehHookStatus::InvalidArgument;
+    if (TotalSize <= AbsoluteJumpSize && !Record.RedirectAddress)
+        return VehHookStatus::InvalidArgument;
 
     void* TrampolineAddress = VirtualAlloc(nullptr, TotalSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
     if (!TrampolineAddress)
@@ -168,7 +171,8 @@ static VehHookStatus BuildTrampoline(VehHookRecord& Record)
 
 static void FreeTrampoline(VehHookRecord& Record)
 {
-    if (!Record.TrampolineAddress) return;
+    if (!Record.TrampolineAddress)
+        return;
 
     VirtualFree(Record.TrampolineAddress, 0, MEM_RELEASE);
     Record.TrampolineAddress = nullptr;
@@ -377,7 +381,8 @@ static VehHookStatus ApplyHardwareBreakpointToThreads(const VehHookRecord& Recor
     const DWORD   ProcessId  = GetCurrentProcessId();
     do
     {
-        if (Entry.th32OwnerProcessID != ProcessId) continue;
+        if (Entry.th32OwnerProcessID != ProcessId)
+            continue;
 
         const VehHookStatus Status = ApplyHardwareBreakpointToThread(Entry.th32ThreadID, Record.TargetAddress, Enable);
         if (Status != VehHookStatus::Ok && FirstError == VehHookStatus::Ok)
@@ -405,7 +410,8 @@ static VehHookStatus InstallHookRecord(VehHookRecord& Record)
     if (IsJumpType(Record.Type))
     {
         Status = BuildTrampoline(Record);
-        if (Status != VehHookStatus::Ok) return Status;
+        if (Status != VehHookStatus::Ok)
+            return Status;
     }
 
     if (IsInt3Type(Record.Type))
@@ -482,10 +488,12 @@ static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch
     {
         for (VehHookRecord& Record : HookRecords)
         {
-            if (Record.Type != VehHookType::Int3Trace) continue;
+            if (Record.Type != VehHookType::Int3Trace)
+                continue;
 
             const auto FoundThread = Record.TraceThreadIds.find(CurrentThreadId);
-            if (FoundThread == Record.TraceThreadIds.end()) continue;
+            if (FoundThread == Record.TraceThreadIds.end())
+                continue;
 
             Record.TraceThreadIds.erase(FoundThread);
             if (Record.TraceThreadIds.empty())
@@ -503,13 +511,15 @@ static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch
 
     for (VehHookRecord& Record : HookRecords)
     {
-        if (Record.TargetAddress != Address) continue;
+        if (Record.TargetAddress != Address)
+            continue;
 
         const bool TraceMatch      = ExceptionCode == EXCEPTION_BREAKPOINT && Record.Type == VehHookType::Int3Trace;
         const bool BreakpointMatch = ExceptionCode == EXCEPTION_BREAKPOINT &&
                                      (Record.Type == VehHookType::Int3 || Record.Type == VehHookType::Int3Jump);
         const bool HardwareMatch = ExceptionCode == EXCEPTION_SINGLE_STEP && IsHardwareType(Record.Type);
-        if (!TraceMatch && !BreakpointMatch && !HardwareMatch) continue;
+        if (!TraceMatch && !BreakpointMatch && !HardwareMatch)
+            continue;
 
         if (TraceMatch)
         {
@@ -611,15 +621,19 @@ static LONG NTAPI VehExceptionHandler(PEXCEPTION_POINTERS PExceptionInfo)
 
 static VehHookStatus ValidateOptions(const VehHookOptions& Options)
 {
-    if (!IsKnownType(Options.Type)) return VehHookStatus::TypeInvalid;
-    if (!Options.TargetAddress) return VehHookStatus::InvalidArgument;
+    if (!IsKnownType(Options.Type))
+        return VehHookStatus::TypeInvalid;
+    if (!Options.TargetAddress)
+        return VehHookStatus::InvalidArgument;
     if (Options.Type != VehHookType::Int3Trace && Options.Type != VehHookType::HardwareTrace &&
         !Options.RedirectAddress)
     {
         return VehHookStatus::InvalidArgument;
     }
-    if (Options.TrampolineSize > 0 && !Options.TrampolineBytes) return VehHookStatus::InvalidArgument;
-    if (!IsJumpType(Options.Type) && Options.TrampolineSize > 0) return VehHookStatus::InvalidArgument;
+    if (Options.TrampolineSize > 0 && !Options.TrampolineBytes)
+        return VehHookStatus::InvalidArgument;
+    if (!IsJumpType(Options.Type) && Options.TrampolineSize > 0)
+        return VehHookStatus::InvalidArgument;
 
     return VehHookStatus::Ok;
 }
@@ -777,7 +791,8 @@ VehHookStatus RefreshHardwareVehHooks()
     VehHookStatus FirstError = VehHookStatus::Ok;
     for (const VehHookRecord& Record : HookRecords)
     {
-        if (!IsHardwareType(Record.Type)) continue;
+        if (!IsHardwareType(Record.Type))
+            continue;
 
         const VehHookStatus Status = ApplyHardwareBreakpointToThreads(Record, true);
         if (Status != VehHookStatus::Ok && FirstError == VehHookStatus::Ok)

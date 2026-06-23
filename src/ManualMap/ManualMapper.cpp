@@ -19,7 +19,8 @@ constexpr WORD CurrentArch = IMAGE_FILE_MACHINE_I386;
 
 static void ReleaseRemoteMemory(HANDLE Process, void* Address)
 {
-    if (!Address) return;
+    if (!Address)
+        return;
     VirtualFreeEx(Process, Address, 0, MEM_RELEASE);
 }
 } // namespace
@@ -34,7 +35,8 @@ bool ManualMapDll(HANDLE Process,
                   DWORD  Reason,
                   LPVOID Reserved)
 {
-    if (!Process || !SourceData || FileSize < 0x1000) return false;
+    if (!Process || !SourceData || FileSize < 0x1000)
+        return false;
 
     if (reinterpret_cast<IMAGE_DOS_HEADER*>(SourceData)->e_magic != IMAGE_DOS_SIGNATURE)
     {
@@ -83,7 +85,8 @@ bool ManualMapDll(HANDLE Process,
     IMAGE_SECTION_HEADER* SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
     for (UINT i = 0; i != FileHeader->NumberOfSections; ++i, ++SectionHeader)
     {
-        if (!SectionHeader->SizeOfRawData) continue;
+        if (!SectionHeader->SizeOfRawData)
+            continue;
 
         if (!WriteProcessMemory(Process,
                                 TargetBase + SectionHeader->VirtualAddress,
@@ -180,13 +183,15 @@ bool ManualMapDll(HANDLE Process,
         SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
         for (UINT i = 0; i != FileHeader->NumberOfSections; ++i, ++SectionHeader)
         {
-            if (!SectionHeader->Misc.VirtualSize) continue;
+            if (!SectionHeader->Misc.VirtualSize)
+                continue;
 
             const bool ShouldClear =
                 (!SEHExceptionSupport && std::strcmp(reinterpret_cast<char*>(SectionHeader->Name), ".pdata") == 0) ||
                 std::strcmp(reinterpret_cast<char*>(SectionHeader->Name), ".rsrc") == 0 ||
                 std::strcmp(reinterpret_cast<char*>(SectionHeader->Name), ".reloc") == 0;
-            if (!ShouldClear) continue;
+            if (!ShouldClear)
+                continue;
 
             WriteProcessMemory(Process,
                                TargetBase + SectionHeader->VirtualAddress,
@@ -201,7 +206,8 @@ bool ManualMapDll(HANDLE Process,
         SectionHeader = IMAGE_FIRST_SECTION(NtHeader);
         for (UINT i = 0; i != FileHeader->NumberOfSections; ++i, ++SectionHeader)
         {
-            if (!SectionHeader->Misc.VirtualSize) continue;
+            if (!SectionHeader->Misc.VirtualSize)
+                continue;
 
             DWORD NewProtect = PAGE_READONLY;
             if ((SectionHeader->Characteristics & IMAGE_SCN_MEM_WRITE) > 0)
