@@ -56,9 +56,7 @@ static float ModuleDescriptionBottomPadding()
 static float ModuleBottomDescriptionHeight(float DescriptionHeight, float OpenT)
 {
     if (OpenT <= 0.001f)
-    {
         return 0.0f;
-    }
 
     const SizeTokens& S = Sizes();
     return (S.ItemGap + DescriptionHeight + ModuleDescriptionBottomPadding()) * Saturate(OpenT);
@@ -87,9 +85,7 @@ static void DrawCenteredIcon(
 {
     const char* Text = ToIconString(IconValue);
     if (!Text[0])
-    {
         return;
-    }
 
     const ImVec2 TextSize = Font->CalcTextSizeA(FontSize, FLT_MAX, 0.0f, Text);
     DrawList->AddText(Font, FontSize, ImVec2(Center.x - TextSize.x * 0.5f, Center.y - TextSize.y * 0.5f), Color, Text);
@@ -115,9 +111,7 @@ static void DrawModuleArrow(
 static bool DrawModuleCheckbox(const ImRect& Bounds, ImGuiID Id, bool* Value, bool Enabled)
 {
     if (!Value)
-    {
         return false;
-    }
 
     bool Hovered = false;
     bool Pressed = false;
@@ -165,9 +159,7 @@ static float MeasuredChildContentHeight()
 {
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
     if (!Window)
-    {
         return 0.0f;
-    }
 
     return ImMax(0.0f, Window->DC.CursorMaxPos.y - Window->DC.CursorStartPos.y);
 }
@@ -175,9 +167,7 @@ static float MeasuredChildContentHeight()
 static void DrawModuleBottomDescription(const ModuleFrame& Frame)
 {
     if (!Frame.ShowBottomDescription || !Frame.Description || Frame.OpenT <= 0.001f)
-    {
         return;
-    }
 
     const SizeTokens&  S         = Sizes();
     const ColorTokens& C         = Colors();

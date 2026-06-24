@@ -32,9 +32,7 @@ class CallStackSpoof
     RetT Invoke(void* Func, T1 A1 = {}, T2 A2 = {}, T3 A3 = {}, T4 A4 = {}, Args... Rest) const
     {
         if (m_Trampoline == 0)
-        {
             return reinterpret_cast<RetT (*)(T1, T2, T3, T4, Args...)>(Func)(A1, A2, A3, A4, Rest...);
-        }
         using TrampolineFn = RetT (*)(T1, T2, T3, T4, void*, Args...);
         return reinterpret_cast<TrampolineFn>(m_Trampoline)(A1, A2, A3, A4, Func, Rest...);
     }

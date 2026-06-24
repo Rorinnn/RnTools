@@ -13,9 +13,7 @@ static constexpr std::size_t MaxChordKeys = 8;
 static bool SendVirtualKey(WORD VirtualKey, bool Down)
 {
     if (!VirtualKey)
-    {
         return false;
-    }
 
     INPUT InputValue  = {};
     InputValue.type   = INPUT_KEYBOARD;
@@ -36,16 +34,12 @@ bool TapVirtualKey(WORD VirtualKey, DWORD PressMs)
 bool TapVirtualKeyChord(const WORD* PVirtualKeys, std::size_t Count, DWORD PressMs)
 {
     if (!PVirtualKeys || Count == 0 || Count > MaxChordKeys)
-    {
         return false;
-    }
 
     for (std::size_t i = 0; i < Count; i++)
     {
         if (!PVirtualKeys[i])
-        {
             return false;
-        }
     }
 
     for (std::size_t i = 0; i < Count; i++)

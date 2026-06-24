@@ -12,9 +12,7 @@ namespace RorinnnTools
 void __stdcall ManualMapShellcode(ManualMappingData* Data)
 {
     if (!Data)
-    {
         return;
-    }
 
     BYTE* Base           = Data->Base;
     auto* OptionalHeader = &reinterpret_cast<IMAGE_NT_HEADERS*>(

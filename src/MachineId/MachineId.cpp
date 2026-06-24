@@ -125,9 +125,7 @@ static std::string ToUtf8(const wchar_t* Text)
 static std::string VariantToString(const VARIANT& Value)
 {
     if (Value.vt == VT_BSTR)
-    {
         return Trim(ToUtf8(Value.bstrVal));
-    }
 
     VARIANT TextValue{};
     VariantInit(&TextValue);
@@ -144,9 +142,7 @@ static std::string VariantToString(const VARIANT& Value)
 static std::uint64_t VariantToUInt64(const VARIANT& Value)
 {
     if (Value.vt == VT_I8 || Value.vt == VT_UI8)
-    {
         return static_cast<std::uint64_t>(Value.ullVal);
-    }
 
     std::string Text = VariantToString(Value);
     if (Text.empty())
@@ -205,16 +201,12 @@ static bool ConnectWmi(IWbemServices*& Services)
     HRESULT    Result = CoCreateInstance(
         CLSID_WbemLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(Locator.Out()));
     if (FAILED(Result))
-    {
         return false;
-    }
 
     Result = Locator.As<IWbemLocator>()->ConnectServer(
         _bstr_t(L"ROOT\\CIMV2"), nullptr, nullptr, nullptr, 0, nullptr, nullptr, &Services);
     if (FAILED(Result))
-    {
         return false;
-    }
 
     Result = CoSetProxyBlanket(Services,
                                RPC_C_AUTHN_WINNT,
@@ -244,9 +236,7 @@ static std::vector<IWbemClassObject*> ExecuteWmiQuery(IWbemServices* Services, c
     HRESULT               Result     = Services->ExecQuery(
         _bstr_t(L"WQL"), _bstr_t(Query), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &Enumerator);
     if (FAILED(Result) || !Enumerator)
-    {
         return Objects;
-    }
 
     while (true)
     {
@@ -409,15 +399,11 @@ bool BuildMachineCode(std::string& MachineCode)
 
     ComScope Com;
     if (!Com.IsReady())
-    {
         return false;
-    }
 
     IWbemServices* Services = nullptr;
     if (!ConnectWmi(Services))
-    {
         return false;
-    }
 
     ComRelease     ServicesScope(Services);
     const WmiQuery Queries[] = {
@@ -435,9 +421,7 @@ bool BuildMachineCode(std::string& MachineCode)
     }
 
     if (Material.empty() || Material == "UnknownUnknown|Count:0|TotalSize:0")
-    {
         return false;
-    }
 
     return BuildSha256Base64Url(Material, MachineCode);
 }

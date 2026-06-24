@@ -39,9 +39,7 @@ static ImFont* LoadWindowsTextFont(ImFontAtlas* Atlas, float TextSize, bool& Use
     char FontPath[MAX_PATH] = {};
     ExpandEnvironmentStringsA("%SystemRoot%\\Fonts\\msyhbd.ttc", FontPath, MAX_PATH);
     if (GetFileAttributesA(FontPath) != INVALID_FILE_ATTRIBUTES)
-    {
         return Atlas->AddFontFromFileTTF(FontPath, TextSize, nullptr, Atlas->GetGlyphRangesChineseSimplifiedCommon());
-    }
 #else
     (void)TextSize;
 #endif
@@ -53,9 +51,7 @@ static ImFont* LoadIconFont(ImFontAtlas* Atlas, float IconSize, bool FixedWidth)
 {
     const std::size_t SolidSize = GetEmbeddedResourceSize(_binary_FontAwesomeSolid_bin_start, _binary_FontAwesomeSolid_bin_end);
     if (SolidSize == 0 || SolidSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
-    {
         return nullptr;
-    }
 
     ImFontConfig Config{};
     Config.FontDataOwnedByAtlas = false;
@@ -76,9 +72,7 @@ static bool LoadBrandIcons(ImFontAtlas* Atlas, float IconSize, bool FixedWidth)
     const std::size_t BrandsSize =
         GetEmbeddedResourceSize(_binary_FontAwesomeBrands_bin_start, _binary_FontAwesomeBrands_bin_end);
     if (BrandsSize == 0 || BrandsSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
-    {
         return false;
-    }
 
     ImFontConfig Config{};
     Config.MergeMode            = true;
@@ -100,9 +94,7 @@ bool LoadFonts(float TextSize, float IconSize)
     ImGuiIO&     Io    = ImGui::GetIO();
     ImFontAtlas* Atlas = Io.Fonts;
     if (!Atlas)
-    {
         return false;
-    }
 
     g_Fonts = {};
     Atlas->Clear();
@@ -110,9 +102,7 @@ bool LoadFonts(float TextSize, float IconSize)
     bool UsedDefaultFont = false;
     g_Fonts.Default      = LoadWindowsTextFont(Atlas, TextSize, UsedDefaultFont);
     if (!g_Fonts.Default)
-    {
         return false;
-    }
     g_Fonts.UsedDefaultTextFont = UsedDefaultFont;
 
     g_Fonts.Icon                = LoadIconFont(Atlas, IconSize, false);

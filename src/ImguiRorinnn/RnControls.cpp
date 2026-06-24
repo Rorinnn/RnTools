@@ -197,9 +197,7 @@ static void DrawInputTextState(ImGuiID Id, const ImVec2& FrameMin, const ImVec2&
     const bool  Focused = ImGui::IsItemActive() || ImGui::IsItemFocused();
     const float FocusT  = AnimateBool(ChildAnimId(Id, "InputFocus"), Focused, 18.0f);
     if (FocusT <= 0.01f)
-    {
         return;
-    }
 
     const ColorTokens& C        = Colors();
     const SizeTokens&  S        = Sizes();
@@ -215,9 +213,7 @@ static void DrawInputTextState(ImGuiID Id, const ImVec2& FrameMin, const ImVec2&
 
     ImGuiInputTextState* State = ImGui::GetInputTextState(Id);
     if (!Focused || !State)
-    {
         return;
-    }
 
     const char* TextValue = State->GetText();
     const int   CursorPos = std::clamp(State->GetCursorPos(), 0, State->TextLen);
@@ -225,9 +221,7 @@ static void DrawInputTextState(ImGuiID Id, const ImVec2& FrameMin, const ImVec2&
     const float TextWidth = ImGui::CalcTextSize(TextValue, CursorEnd).x;
     const float CursorX   = FrameMin.x + S.FramePadding.x + TextWidth - State->Scroll.x;
     if (CursorX < FrameMin.x + S.FramePadding.x * 0.5f || CursorX > FrameMax.x - S.FramePadding.x * 0.5f)
-    {
         return;
-    }
 
     const float CursorTop    = FrameMin.y + S.FramePadding.y;
     const float CursorBottom = FrameMax.y - S.FramePadding.y;
@@ -271,9 +265,7 @@ bool Hyperlink(const char* Label, const char* Url)
 {
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
     if (Window->SkipItems)
-    {
         return false;
-    }
 
     const ColorTokens& C         = Colors();
     const ImGuiID      Id        = ImGui::GetID(Label);
@@ -284,9 +276,7 @@ bool Hyperlink(const char* Label, const char* Url)
 
     ImGui::ItemSize(Bounds);
     if (!ImGui::ItemAdd(Bounds, Id))
-    {
         return false;
-    }
 
     bool         Hovered   = false;
     bool         Held      = false;
@@ -376,15 +366,11 @@ void BadgeNumber(int Value, BadgeVariant Variant)
 bool InfoBar(const char* Message, InfoSeverity Severity, bool* Open, const char* ActionLabel)
 {
     if (Open && !*Open)
-    {
         return false;
-    }
 
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
     if (Window->SkipItems)
-    {
         return false;
-    }
 
     const ColorTokens& C         = Colors();
     const SizeTokens&  S         = Sizes();
@@ -398,9 +384,7 @@ bool InfoBar(const char* Message, InfoSeverity Severity, bool* Open, const char*
 
     ImGui::ItemSize(Bounds);
     if (!ImGui::ItemAdd(Bounds, Id))
-    {
         return false;
-    }
 
     Window->DrawList->AddRectFilled(Bounds.Min, Bounds.Max, ToU32(WithAlpha(Accent, 0.13f)), S.ControlRounding);
     Window->DrawList->AddRect(
@@ -753,9 +737,7 @@ bool SegmentedControl(const char* Id, int* CurrentItem, const char* const Items[
 {
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
     if (Window->SkipItems || !CurrentItem || !Items || ItemCount <= 0)
-    {
         return false;
-    }
 
     ImGui::PushID(Id);
     const ColorTokens& C        = Colors();
@@ -1022,9 +1004,7 @@ bool BeginTable(const char* Id, int ColumnCount, ImGuiTableFlags Flags, const Im
 void TableHeadersRow(const char* const Headers[], int HeaderCount)
 {
     if (!Headers || HeaderCount <= 0)
-    {
         return;
-    }
 
     const ColorTokens& C = Colors();
     const SizeTokens&  S = Sizes();
@@ -1064,9 +1044,7 @@ void EndTable()
     ImGui::EndTable();
 
     if (!HasFrame)
-    {
         return;
-    }
 
     Frame.Min = ImGui::GetItemRectMin();
     Frame.Max = ImGui::GetItemRectMax();
@@ -1156,16 +1134,12 @@ void DrawTitleBarCollapseButton(const char* Id, const char* CollapseTooltip, con
 {
     ImGuiWindow* Window = ImGui::GetCurrentWindow();
     if (!Window || Window->Hidden)
-    {
         return;
-    }
 
     const ImGuiStyle& Style        = ImGui::GetStyle();
     const ImRect      TitleBarRect = Window->TitleBarRect();
     if (TitleBarRect.GetHeight() <= 0.0f || TitleBarRect.GetWidth() <= 0.0f)
-    {
         return;
-    }
 
     const float ButtonSize   = ImMax(1.0f, TitleBarRect.GetHeight() - Style.FramePadding.y * 2.0f);
     float       RightPadding = Style.FramePadding.x;
@@ -1176,9 +1150,7 @@ void DrawTitleBarCollapseButton(const char* Id, const char* CollapseTooltip, con
 
     const ImVec2 ButtonMin(TitleBarRect.Max.x - RightPadding - ButtonSize, TitleBarRect.Min.y + Style.FramePadding.y);
     if (ButtonMin.x <= TitleBarRect.Min.x)
-    {
         return;
-    }
 
     ImDrawList* DrawList = Window->DrawList;
     DrawList->PushClipRect(TitleBarRect.Min, TitleBarRect.Max, false);

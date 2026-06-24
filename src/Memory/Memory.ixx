@@ -15,9 +15,7 @@ template <typename T>
 bool ReadValue(std::uintptr_t Ptr, T& Value)
 {
     if (!ReadBytes(Ptr, &Value, sizeof(T)))
-    {
         return false;
-    }
     return true;
 }
 

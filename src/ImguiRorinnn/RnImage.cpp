@@ -25,9 +25,7 @@ static bool EnsureComInitialized()
 static bool CreateWicFactory(ComPtr<IWICImagingFactory>& Factory)
 {
     if (!EnsureComInitialized())
-    {
         return false;
-    }
 
     return SUCCEEDED(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&Factory)));
 }
@@ -35,34 +33,24 @@ static bool CreateWicFactory(ComPtr<IWICImagingFactory>& Factory)
 static bool CreateTextureFromBitmap(ID3D11Device* Device, IWICBitmapSource* BitmapSource, ImageTexture& Texture)
 {
     if (!Device || !BitmapSource)
-    {
         return false;
-    }
 
     UINT Width  = 0;
     UINT Height = 0;
     if (FAILED(BitmapSource->GetSize(&Width, &Height)) || Width == 0 || Height == 0)
-    {
         return false;
-    }
     if (Width > static_cast<UINT>((std::numeric_limits<int>::max)()) ||
         Height > static_cast<UINT>((std::numeric_limits<int>::max)()) || Width > (std::numeric_limits<UINT>::max)() / 4)
-    {
         return false;
-    }
 
     const UINT Stride = Width * 4;
     if (Height > (std::numeric_limits<UINT>::max)() / Stride)
-    {
         return false;
-    }
 
     const UINT                BufferSize = Stride * Height;
     std::vector<std::uint8_t> Pixels(BufferSize);
     if (FAILED(BitmapSource->CopyPixels(nullptr, Stride, BufferSize, Pixels.data())))
-    {
         return false;
-    }
 
     D3D11_TEXTURE2D_DESC Desc = {};
     Desc.Width                = Width;
@@ -81,9 +69,7 @@ static bool CreateTextureFromBitmap(ID3D11Device* Device, IWICBitmapSource* Bitm
     ComPtr<ID3D11Texture2D> Texture2D;
     HRESULT                 Result = Device->CreateTexture2D(&Desc, &InitialData, &Texture2D);
     if (FAILED(Result))
-    {
         return false;
-    }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC ViewDesc = {};
     ViewDesc.Format                          = Desc.Format;
@@ -92,9 +78,7 @@ static bool CreateTextureFromBitmap(ID3D11Device* Device, IWICBitmapSource* Bitm
 
     ID3D11ShaderResourceView* View = nullptr;
     if (FAILED(Device->CreateShaderResourceView(Texture2D.Get(), &ViewDesc, &View)))
-    {
         return false;
-    }
 
     DestroyDx11Texture(Texture);
     Texture.View   = View;
@@ -107,21 +91,15 @@ static bool CreateTextureFromDecoder(ID3D11Device* Device, IWICBitmapDecoder* De
 {
     ComPtr<IWICImagingFactory> Factory;
     if (!CreateWicFactory(Factory) || !Decoder)
-    {
         return false;
-    }
 
     ComPtr<IWICBitmapFrameDecode> Frame;
     if (FAILED(Decoder->GetFrame(0, &Frame)))
-    {
         return false;
-    }
 
     ComPtr<IWICFormatConverter> Converter;
     if (FAILED(Factory->CreateFormatConverter(&Converter)))
-    {
         return false;
-    }
 
     if (FAILED(Converter->Initialize(Frame.Get(),
                                      GUID_WICPixelFormat32bppRGBA,
@@ -129,9 +107,7 @@ static bool CreateTextureFromDecoder(ID3D11Device* Device, IWICBitmapDecoder* De
                                      nullptr,
                                      0.0,
                                      WICBitmapPaletteTypeCustom)))
-    {
         return false;
-    }
 
     return CreateTextureFromBitmap(Device, Converter.Get(), Texture);
 }
@@ -140,32 +116,22 @@ static bool CreateTextureFromDecoder(ID3D11Device* Device, IWICBitmapDecoder* De
 bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, std::size_t Size, ImageTexture& Texture)
 {
     if (!Device || !Data || Size == 0 || Size > std::numeric_limits<std::uint32_t>::max())
-    {
         return false;
-    }
 
     ComPtr<IWICImagingFactory> Factory;
     if (!CreateWicFactory(Factory))
-    {
         return false;
-    }
 
     ComPtr<IWICStream> Stream;
     if (FAILED(Factory->CreateStream(&Stream)))
-    {
         return false;
-    }
 
     if (FAILED(Stream->InitializeFromMemory((WICInProcPointer)Data, (DWORD)Size)))
-    {
         return false;
-    }
 
     ComPtr<IWICBitmapDecoder> Decoder;
     if (FAILED(Factory->CreateDecoderFromStream(Stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &Decoder)))
-    {
         return false;
-    }
 
     return CreateTextureFromDecoder(Device, Decoder.Get(), Texture);
 }
@@ -173,21 +139,15 @@ bool CreateDx11TextureFromMemory(ID3D11Device* Device, const void* Data, std::si
 bool CreateDx11TextureFromFile(ID3D11Device* Device, const wchar_t* Path, ImageTexture& Texture)
 {
     if (!Device || !Path || !Path[0])
-    {
         return false;
-    }
 
     ComPtr<IWICImagingFactory> Factory;
     if (!CreateWicFactory(Factory))
-    {
         return false;
-    }
 
     ComPtr<IWICBitmapDecoder> Decoder;
     if (FAILED(Factory->CreateDecoderFromFilename(Path, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &Decoder)))
-    {
         return false;
-    }
 
     return CreateTextureFromDecoder(Device, Decoder.Get(), Texture);
 }

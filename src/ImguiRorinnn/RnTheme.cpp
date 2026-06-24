@@ -24,9 +24,7 @@ static ImVec4 Col(float R, float G, float B, float A = 1.0f)
 static void ApplyStyleFromTheme(const Theme& ThemeValue)
 {
     if (!ImGui::GetCurrentContext())
-    {
         return;
-    }
 
     ImGuiStyle&        Style = ImGui::GetStyle();
     const ColorTokens& C     = ThemeValue.Colors;

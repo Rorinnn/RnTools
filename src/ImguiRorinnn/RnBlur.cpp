@@ -92,9 +92,7 @@ bool Dx11GaussianBlur::Initialize(ID3D11Device* Device, ID3D11DeviceContext* Con
 {
     Shutdown();
     if (!Device || !Context)
-    {
         return false;
-    }
 
     D3dDevice  = Device;
     D3dContext = Context;
@@ -128,9 +126,7 @@ bool Dx11GaussianBlur::Resize(int Width, int Height)
     Height = std::max(1, Height);
     if (PingTarget.Width == Width && PingTarget.Height == Height && PongTarget.Width == Width &&
         PongTarget.Height == Height)
-    {
         return true;
-    }
 
     DestroyTarget(PingTarget);
     DestroyTarget(PongTarget);
@@ -140,9 +136,7 @@ bool Dx11GaussianBlur::Resize(int Width, int Height)
 bool Dx11GaussianBlur::Blur(ID3D11ShaderResourceView* SourceView, float Radius, int PassCount)
 {
     if (!D3dContext || !SourceView || !PingTarget.RenderTargetView || !PongTarget.RenderTargetView)
-    {
         return false;
-    }
 
     PassCount                               = std::max(1, PassCount);
     ID3D11ShaderResourceView* CurrentSource = SourceView;
@@ -207,9 +201,7 @@ bool Dx11GaussianBlur::CreateShaders()
                                 &ErrorBlob);
     ReleaseObject(ErrorBlob);
     if (FAILED(Result))
-    {
         return false;
-    }
 
     Result = D3DCompile(BlurShaderSource,
                         sizeof(BlurShaderSource) - 1,
@@ -239,9 +231,7 @@ bool Dx11GaussianBlur::CreateShaders()
     ReleaseObject(VertexBlob);
     ReleaseObject(PixelBlob);
     if (FAILED(Result))
-    {
         return false;
-    }
 
     D3D11_BUFFER_DESC BufferDesc = {};
     BufferDesc.ByteWidth         = sizeof(BlurConstants);
@@ -262,9 +252,7 @@ bool Dx11GaussianBlur::CreateSampler()
     SamplerDesc.MinLOD             = 0.0f;
     SamplerDesc.MaxLOD             = D3D11_FLOAT32_MAX;
     if (FAILED(D3dDevice->CreateSamplerState(&SamplerDesc, &SamplerState)))
-    {
         return false;
-    }
 
     D3D11_BLEND_DESC BlendDesc                      = {};
     BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -284,9 +272,7 @@ bool Dx11GaussianBlur::CreateTarget(Dx11BlurTarget& Target, int Width, int Heigh
     TextureDesc.BindFlags            = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 
     if (FAILED(D3dDevice->CreateTexture2D(&TextureDesc, nullptr, &Target.Texture)))
-    {
         return false;
-    }
     if (FAILED(D3dDevice->CreateShaderResourceView(Target.Texture, nullptr, &Target.ShaderResourceView)) ||
         FAILED(D3dDevice->CreateRenderTargetView(Target.Texture, nullptr, &Target.RenderTargetView)))
     {

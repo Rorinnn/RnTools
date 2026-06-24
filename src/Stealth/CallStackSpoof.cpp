@@ -310,9 +310,7 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
     HANDLE               Proc = GetCurrentProcess();
     std::vector<HMODULE> Modules;
     if (!EnumProcessModulesGrowing(Proc, Modules) || Modules.empty())
-    {
         return false;
-    }
 
     std::random_device Rd;
     std::mt19937       Gen(Rd());
@@ -337,9 +335,7 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
     }
 
     if (!Slot)
-    {
         return false;
-    }
 
     std::uint8_t Buffer[sizeof(SpoofShellcodeTemplate)];
     std::memcpy(Buffer, kSpoofShellcode, sizeof(Buffer));
@@ -348,9 +344,7 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
     Tpl->SecondXorKey = XorKey;
 
     if (!WriteShellcodeToCave(Slot, Buffer, sizeof(Buffer)))
-    {
         return false;
-    }
 
     m_Trampoline = reinterpret_cast<std::uint64_t>(Slot);
     return true;

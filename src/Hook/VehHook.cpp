@@ -109,9 +109,7 @@ static bool WriteMemoryBytes(void* PAddress, const void* PData, std::size_t Size
 
     DWORD OldProtection = 0;
     if (!VirtualProtect(PAddress, Size, PAGE_EXECUTE_READWRITE, &OldProtection))
-    {
         return false;
-    }
 
     bool Written = false;
     __try
@@ -152,9 +150,7 @@ static VehHookStatus BuildTrampoline(VehHookRecord& Record)
 
     void* TrampolineAddress = VirtualAlloc(nullptr, TotalSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
     if (!TrampolineAddress)
-    {
         return VehHookStatus::AllocateFailed;
-    }
 
     std::uint8_t* TrampolineBytes = static_cast<std::uint8_t*>(TrampolineAddress);
     if (PrefixSize > 0)
@@ -182,15 +178,11 @@ static void FreeTrampoline(VehHookRecord& Record)
 static VehHookStatus InstallInt3Hook(VehHookRecord& Record)
 {
     if (!ReadMemoryBytes(Record.TargetAddress, &Record.OriginalByte, sizeof(Record.OriginalByte)))
-    {
         return VehHookStatus::ReadFailed;
-    }
 
     constexpr std::uint8_t Int3Opcode = 0xCC;
     if (!WriteMemoryBytes(Record.TargetAddress, &Int3Opcode, sizeof(Int3Opcode)))
-    {
         return VehHookStatus::WriteFailed;
-    }
 
     return VehHookStatus::Ok;
 }
@@ -198,9 +190,7 @@ static VehHookStatus InstallInt3Hook(VehHookRecord& Record)
 static VehHookStatus RemoveInt3Hook(const VehHookRecord& Record)
 {
     if (!WriteMemoryBytes(Record.TargetAddress, &Record.OriginalByte, sizeof(Record.OriginalByte)))
-    {
         return VehHookStatus::WriteFailed;
-    }
 
     return VehHookStatus::Ok;
 }
@@ -322,9 +312,7 @@ static VehHookStatus ApplyHardwareBreakpointToThread(DWORD ThreadId, void* PTarg
     HANDLE Thread = OpenThread(
         THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_SUSPEND_RESUME | THREAD_QUERY_INFORMATION, FALSE, ThreadId);
     if (!Thread)
-    {
         return GetLastError() == ERROR_INVALID_PARAMETER ? VehHookStatus::Ok : VehHookStatus::ThreadOpenFailed;
-    }
 
     const bool ShouldSuspend = ThreadId != GetCurrentThreadId();
     if (ShouldSuspend && SuspendThread(Thread) == static_cast<DWORD>(-1))
@@ -364,9 +352,7 @@ static VehHookStatus ApplyHardwareBreakpointToThreads(const VehHookRecord& Recor
 {
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
     if (Snapshot == INVALID_HANDLE_VALUE)
-    {
         return VehHookStatus::ThreadSnapshotFailed;
-    }
 
     THREADENTRY32 Entry = {};
     Entry.dwSize        = sizeof(Entry);
@@ -475,9 +461,7 @@ static VehHookStatus RemoveHookRecord(VehHookRecord& Record)
 static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch& Dispatch)
 {
     if (!PExceptionInfo || !PExceptionInfo->ExceptionRecord || !PExceptionInfo->ContextRecord)
-    {
         return false;
-    }
 
     const DWORD ExceptionCode   = PExceptionInfo->ExceptionRecord->ExceptionCode;
     void*       Address         = PExceptionInfo->ExceptionRecord->ExceptionAddress;
@@ -524,9 +508,7 @@ static bool TryBuildDispatch(PEXCEPTION_POINTERS PExceptionInfo, VehHookDispatch
         if (TraceMatch)
         {
             if (!WriteMemoryBytes(Record.TargetAddress, &Record.OriginalByte, sizeof(Record.OriginalByte)))
-            {
                 return false;
-            }
 
             Record.TraceThreadIds.insert(CurrentThreadId);
         }
@@ -575,9 +557,7 @@ static bool IsTraceStepPending(int Token, DWORD ThreadId)
         HookRecords.begin(), HookRecords.end(), [&](const VehHookRecord& Record)
         { return Record.Token == Token; });
     if (Found == HookRecords.end())
-    {
         return false;
-    }
 
     return Found->Type == VehHookType::Int3Trace && Found->TraceThreadIds.find(ThreadId) != Found->TraceThreadIds.end();
 }
@@ -586,14 +566,10 @@ static LONG NTAPI VehExceptionHandler(PEXCEPTION_POINTERS PExceptionInfo)
 {
     VehHookDispatch Dispatch = {};
     if (!TryBuildDispatch(PExceptionInfo, Dispatch))
-    {
         return EXCEPTION_CONTINUE_SEARCH;
-    }
 
     if (Dispatch.TraceStep)
-    {
         return EXCEPTION_CONTINUE_EXECUTION;
-    }
 
     if (Dispatch.Callback)
     {
@@ -627,9 +603,7 @@ static VehHookStatus ValidateOptions(const VehHookOptions& Options)
         return VehHookStatus::InvalidArgument;
     if (Options.Type != VehHookType::Int3Trace && Options.Type != VehHookType::HardwareTrace &&
         !Options.RedirectAddress)
-    {
         return VehHookStatus::InvalidArgument;
-    }
     if (Options.TrampolineSize > 0 && !Options.TrampolineBytes)
         return VehHookStatus::InvalidArgument;
     if (!IsJumpType(Options.Type) && Options.TrampolineSize > 0)
@@ -647,9 +621,7 @@ VehHookStatus InstallVehHookHandler()
 {
     std::lock_guard<std::mutex> Guard(HookMutex);
     if (ExceptionHandlerHandle)
-    {
         return VehHookStatus::AlreadyInstalled;
-    }
 
     ExceptionHandlerHandle = AddVectoredExceptionHandler(1, VehExceptionHandler);
     return ExceptionHandlerHandle ? VehHookStatus::Ok : VehHookStatus::HandlerInstallFailed;
@@ -659,20 +631,14 @@ VehHookStatus UninstallVehHookHandler()
 {
     const VehHookStatus RemoveStatus = RemoveAllVehHooks();
     if (RemoveStatus != VehHookStatus::Ok)
-    {
         return RemoveStatus;
-    }
 
     std::lock_guard<std::mutex> Guard(HookMutex);
     if (!ExceptionHandlerHandle)
-    {
         return VehHookStatus::NotInstalled;
-    }
 
     if (!RemoveVectoredExceptionHandler(ExceptionHandlerHandle))
-    {
         return VehHookStatus::HandlerInstallFailed;
-    }
 
     ExceptionHandlerHandle = nullptr;
     return VehHookStatus::Ok;
@@ -688,24 +654,18 @@ VehHookStatus AddVehHook(const VehHookOptions& Options)
 {
     std::lock_guard<std::mutex> Guard(HookMutex);
     if (!ExceptionHandlerHandle)
-    {
         return VehHookStatus::NotInstalled;
-    }
 
     const VehHookStatus ValidateStatus = ValidateOptions(Options);
     if (ValidateStatus != VehHookStatus::Ok)
-    {
         return ValidateStatus;
-    }
 
     const auto Exists = std::find_if(HookRecords.begin(),
                                      HookRecords.end(),
                                      [&](const VehHookRecord& Record)
                                      { return Record.Token == Options.Token; });
     if (Exists != HookRecords.end())
-    {
         return VehHookStatus::DuplicateToken;
-    }
 
     const auto SameTarget =
         std::find_if(HookRecords.begin(),
@@ -713,9 +673,7 @@ VehHookStatus AddVehHook(const VehHookOptions& Options)
                      [&](const VehHookRecord& Record)
                      { return Record.TargetAddress == Options.TargetAddress; });
     if (SameTarget != HookRecords.end())
-    {
         return VehHookStatus::DuplicateTarget;
-    }
 
     VehHookRecord Record   = {};
     Record.Token           = Options.Token;
@@ -730,9 +688,7 @@ VehHookStatus AddVehHook(const VehHookOptions& Options)
 
     const VehHookStatus InstallStatus = InstallHookRecord(Record);
     if (InstallStatus != VehHookStatus::Ok)
-    {
         return InstallStatus;
-    }
 
     HookRecords.push_back(std::move(Record));
     return VehHookStatus::Ok;
@@ -746,9 +702,7 @@ VehHookStatus RemoveVehHook(int Token)
         HookRecords.begin(), HookRecords.end(), [&](const VehHookRecord& Record)
         { return Record.Token == Token; });
     if (Found == HookRecords.end())
-    {
         return VehHookStatus::TokenNotFound;
-    }
 
     VehHookStatus Status = RemoveHookRecord(*Found);
     if (Status == VehHookStatus::Ok)

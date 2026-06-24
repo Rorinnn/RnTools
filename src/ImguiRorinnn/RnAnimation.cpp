@@ -46,9 +46,7 @@ float GetFrameDeltaSeconds()
 {
     ImGuiContext* Context = ImGui::GetCurrentContext();
     if (!Context)
-    {
         return 1.0f / 60.0f;
-    }
 
     return std::clamp(ImGui::GetIO().DeltaTime, 0.0f, 0.10f);
 }

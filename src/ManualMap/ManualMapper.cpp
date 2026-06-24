@@ -39,9 +39,7 @@ bool ManualMapDll(HANDLE Process,
         return false;
 
     if (reinterpret_cast<IMAGE_DOS_HEADER*>(SourceData)->e_magic != IMAGE_DOS_SIGNATURE)
-    {
         return false;
-    }
 
     auto* NtHeader =
         reinterpret_cast<IMAGE_NT_HEADERS*>(SourceData + reinterpret_cast<IMAGE_DOS_HEADER*>(SourceData)->e_lfanew);
@@ -49,16 +47,12 @@ bool ManualMapDll(HANDLE Process,
     IMAGE_FILE_HEADER*     FileHeader     = &NtHeader->FileHeader;
 
     if (FileHeader->Machine != CurrentArch)
-    {
         return false;
-    }
 
     BYTE* TargetBase = reinterpret_cast<BYTE*>(
         VirtualAllocEx(Process, nullptr, OptionalHeader->SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
     if (!TargetBase)
-    {
         return false;
-    }
 
     DWORD OldProtect = 0;
     VirtualProtectEx(Process, TargetBase, OptionalHeader->SizeOfImage, PAGE_EXECUTE_READWRITE, &OldProtect);
@@ -147,9 +141,7 @@ bool ManualMapDll(HANDLE Process,
         DWORD ExitCode = 0;
         GetExitCodeProcess(Process, &ExitCode);
         if (ExitCode != STILL_ACTIVE)
-        {
             return false;
-        }
 
         ManualMappingData CheckedData{};
         ReadProcessMemory(Process, MappingDataAlloc, &CheckedData, sizeof(CheckedData), nullptr);
@@ -168,9 +160,7 @@ bool ManualMapDll(HANDLE Process,
 
     BYTE* EmptyBuffer = reinterpret_cast<BYTE*>(std::malloc(1024 * 1024 * 20));
     if (!EmptyBuffer)
-    {
         return false;
-    }
     std::memset(EmptyBuffer, 0, 1024 * 1024 * 20);
 
     if (ClearHeader)

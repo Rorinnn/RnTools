@@ -20,9 +20,7 @@ bool IsReadableRange(std::uintptr_t Ptr, std::size_t Size)
 {
     std::uintptr_t Address = Ptr;
     if (!Address || Size == 0)
-    {
         return false;
-    }
 
     std::uintptr_t StartAddress  = Address;
     std::uintptr_t EndAddress    = Address + Size - 1;
@@ -35,14 +33,10 @@ bool IsReadableRange(std::uintptr_t Ptr, std::size_t Size)
         Info.VirtualAddress                   = reinterpret_cast<PVOID>(PageBase);
 
         if (!QueryWorkingSetEx(GetCurrentProcess(), &Info, sizeof(Info)))
-        {
             return false;
-        }
 
         if (Info.VirtualAttributes.Valid == 0)
-        {
             return false;
-        }
     }
     return true;
 }
@@ -50,14 +44,10 @@ bool IsReadableRange(std::uintptr_t Ptr, std::size_t Size)
 bool ReadBytes(std::uintptr_t Ptr, void* PBuffer, std::size_t Size)
 {
     if (!Ptr || !PBuffer || Size == 0)
-    {
         return false;
-    }
 
     if (!IsReadableRange(Ptr, Size))
-    {
         return false;
-    }
 
     __try
     {

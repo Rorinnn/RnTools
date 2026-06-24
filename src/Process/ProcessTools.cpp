@@ -55,9 +55,7 @@ bool EnableDebugPrivilege()
     TOKEN_PRIVILEGES Privileges{};
     HANDLE           Token = nullptr;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &Token))
-    {
         return false;
-    }
 
     Privileges.PrivilegeCount           = 1;
     Privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;

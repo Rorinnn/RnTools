@@ -34,9 +34,7 @@ static float Lerp(float A, float B, float T)
 static float Wrap(float Value, float Size)
 {
     if (Size <= 0.0f)
-    {
         return 0.0f;
-    }
 
     float Result = std::fmod(Value, Size);
     if (Result < 0.0f)
@@ -82,9 +80,7 @@ void DrawSnowflakes(const char* Id, const ImVec2& Min, const ImVec2& Max, const 
 {
     ImDrawList* DrawList = ImGui::GetWindowDrawList();
     if (!DrawList || Max.x <= Min.x || Max.y <= Min.y || Options.Count <= 0)
-    {
         return;
-    }
 
     const ImGuiID BaseId    = ImGui::GetID(Id ? Id : "Snowflakes");
     const float   Width     = Max.x - Min.x;
