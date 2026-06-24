@@ -191,10 +191,8 @@ static bool IsForbiddenHostName(const char* BaseName)
         "psapi.dll",
     };
     for (const char* Name : kBlacklist)
-    {
         if (_stricmp(BaseName, Name) == 0)
             return true;
-    }
     return false;
 }
 
@@ -329,9 +327,7 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
 
         Slot = SearchCodeCaveInModule(Mod, sizeof(SpoofShellcodeTemplate));
         if (Slot)
-        {
             break;
-        }
     }
 
     if (!Slot)

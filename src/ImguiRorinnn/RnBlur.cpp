@@ -224,10 +224,8 @@ bool Dx11GaussianBlur::CreateShaders()
     Result = D3dDevice->CreateVertexShader(
         VertexBlob->GetBufferPointer(), VertexBlob->GetBufferSize(), nullptr, &VertexShader);
     if (SUCCEEDED(Result))
-    {
         Result = D3dDevice->CreatePixelShader(
             PixelBlob->GetBufferPointer(), PixelBlob->GetBufferSize(), nullptr, &PixelShader);
-    }
     ReleaseObject(VertexBlob);
     ReleaseObject(PixelBlob);
     if (FAILED(Result))

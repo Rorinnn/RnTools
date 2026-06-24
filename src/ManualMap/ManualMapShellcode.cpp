@@ -73,9 +73,7 @@ void __stdcall ManualMapShellcode(ManualMappingData* Data)
             ULONG_PTR* ThunkRef = reinterpret_cast<ULONG_PTR*>(Base + ImportDescr->OriginalFirstThunk);
             ULONG_PTR* FuncRef  = reinterpret_cast<ULONG_PTR*>(Base + ImportDescr->FirstThunk);
             if (!ThunkRef)
-            {
                 ThunkRef = FuncRef;
-            }
 
             for (; *ThunkRef; ++ThunkRef, ++FuncRef)
             {
@@ -101,9 +99,7 @@ void __stdcall ManualMapShellcode(ManualMappingData* Data)
             Base + OptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
         auto* Callback = reinterpret_cast<PIMAGE_TLS_CALLBACK*>(Tls->AddressOfCallBacks);
         for (; Callback && *Callback; ++Callback)
-        {
             (*Callback)(Base, DLL_PROCESS_ATTACH, nullptr);
-        }
     }
 
     bool ExceptionSupportFailed = false;
@@ -116,9 +112,7 @@ void __stdcall ManualMapShellcode(ManualMappingData* Data)
             if (!RtlAddFunctionTable(reinterpret_cast<IMAGE_RUNTIME_FUNCTION_ENTRY*>(Base + Exception.VirtualAddress),
                                      Exception.Size / sizeof(IMAGE_RUNTIME_FUNCTION_ENTRY),
                                      reinterpret_cast<DWORD64>(Base)))
-            {
                 ExceptionSupportFailed = true;
-            }
         }
     }
 #endif

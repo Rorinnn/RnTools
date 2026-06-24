@@ -155,9 +155,7 @@ bool CreateDx11TextureFromFile(ID3D11Device* Device, const wchar_t* Path, ImageT
 void DestroyDx11Texture(ImageTexture& Texture)
 {
     if (Texture.View)
-    {
         Texture.View->Release();
-    }
     Texture = {};
 }
 

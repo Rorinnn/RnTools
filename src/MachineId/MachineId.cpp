@@ -53,9 +53,7 @@ class ComScope
     ~ComScope()
     {
         if (SUCCEEDED(Result))
-        {
             CoUninitialize();
-        }
     }
 
     bool IsReady() const
@@ -76,9 +74,7 @@ class ComRelease
     ~ComRelease()
     {
         if (Value)
-        {
             Value->Release();
-        }
     }
 
     ComRelease(const ComRelease&)            = delete;
@@ -183,10 +179,8 @@ static bool IsValidSerialNumber(const std::string& SerialNumber)
     };
 
     for (const char* Invalid : InvalidValues)
-    {
         if (Value == Invalid)
             return false;
-    }
 
     return std::any_of(
         Value.begin(), Value.end(), [](unsigned char Char)
@@ -244,9 +238,7 @@ static std::vector<IWbemClassObject*> ExecuteWmiQuery(IWbemServices* Services, c
         ULONG             Returned = 0;
         Result                     = Enumerator->Next(WBEM_INFINITE, 1, &Object, &Returned);
         if (FAILED(Result) || Returned == 0 || !Object)
-        {
             break;
-        }
 
         Objects.push_back(Object);
     }
@@ -303,9 +295,7 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
     {
         std::string Value = ReadWmiString(Objects.front(), Query.Property);
         for (IWbemClassObject* Object : Objects)
-        {
             Object->Release();
-        }
 
         return IsValidSerialNumber(Value) ? NormalizeSerial(Value) : "Unknown";
     }
@@ -327,16 +317,12 @@ static std::string GetHardwareInfo(IWbemServices* Services, const WmiQuery& Quer
 
     std::uint64_t TotalSize = 0;
     for (const DiskInfo& Disk : ValidDisks)
-    {
         TotalSize += Disk.Size;
-    }
 
     std::vector<std::string> UniqueSerials;
     UniqueSerials.reserve(ValidDisks.size());
     for (const DiskInfo& Disk : ValidDisks)
-    {
         UniqueSerials.push_back(Disk.SerialNumber);
-    }
 
     std::sort(UniqueSerials.begin(), UniqueSerials.end());
     UniqueSerials.erase(std::unique(UniqueSerials.begin(), UniqueSerials.end()), UniqueSerials.end());
@@ -366,21 +352,13 @@ static bool BuildSha256Base64Url(std::string_view Text, std::string& Result)
 
         Result = Botan::base64_encode(Hash.data(), Hash.size());
         for (char& Char : Result)
-        {
             if (Char == '+')
-            {
                 Char = '-';
-            }
             else if (Char == '/')
-            {
                 Char = '_';
-            }
-        }
 
         while (!Result.empty() && Result.back() == '=')
-        {
             Result.pop_back();
-        }
 
         return true;
     }
@@ -416,9 +394,7 @@ bool BuildMachineCode(std::string& MachineCode)
 
     std::string Material;
     for (const WmiQuery& Query : Queries)
-    {
         Material += GetHardwareInfo(Services, Query);
-    }
 
     if (Material.empty() || Material == "UnknownUnknown|Count:0|TotalSize:0")
         return false;

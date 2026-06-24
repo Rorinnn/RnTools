@@ -164,9 +164,7 @@ bool ManualMapDll(HANDLE Process,
     std::memset(EmptyBuffer, 0, 1024 * 1024 * 20);
 
     if (ClearHeader)
-    {
         WriteProcessMemory(Process, TargetBase, EmptyBuffer, 0x1000, nullptr);
-    }
 
     if (ClearNonNeededSections)
     {
@@ -201,13 +199,9 @@ bool ManualMapDll(HANDLE Process,
 
             DWORD NewProtect = PAGE_READONLY;
             if ((SectionHeader->Characteristics & IMAGE_SCN_MEM_WRITE) > 0)
-            {
                 NewProtect = PAGE_READWRITE;
-            }
             else if ((SectionHeader->Characteristics & IMAGE_SCN_MEM_EXECUTE) > 0)
-            {
                 NewProtect = PAGE_EXECUTE_READ;
-            }
 
             DWORD Old = 0;
             VirtualProtectEx(

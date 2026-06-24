@@ -38,9 +38,7 @@ static float Wrap(float Value, float Size)
 
     float Result = std::fmod(Value, Size);
     if (Result < 0.0f)
-    {
         Result += Size;
-    }
     return Result;
 }
 
@@ -57,9 +55,7 @@ static void DrawSnowCrystal(
         DrawList->AddLine(Center, End, Color, Thickness);
 
         if (Radius < 2.4f)
-        {
             continue;
-        }
 
         const float     ForkDistance = Radius * 0.58f;
         const float     ForkLength   = Radius * 0.28f;

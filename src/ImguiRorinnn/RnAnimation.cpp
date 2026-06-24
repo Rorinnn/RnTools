@@ -64,9 +64,7 @@ float SmoothValue(ImGuiID Id, float Target, float Speed, float InitialValue)
     const float Amount  = 1.0f - std::exp(-Speed * DeltaSeconds);
     Value              += (Target - Value) * Amount;
     if (std::fabs(Value - Target) <= 0.001f)
-    {
         Value = Target;
-    }
     return Value;
 }
 

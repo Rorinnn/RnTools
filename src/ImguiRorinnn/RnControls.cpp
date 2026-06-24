@@ -170,9 +170,7 @@ static ImFont* ResolveIconFont(bool FixedWidth)
 static void ShowTooltip(const char* Tooltip)
 {
     if (Tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
-    {
         ImGui::SetTooltip("%s", Tooltip);
-    }
 }
 
 static ImGuiID ChildAnimId(ImGuiID Id, const char* Name)
@@ -286,12 +284,10 @@ bool Hyperlink(const char* Label, const char* Url)
 
     Window->DrawList->AddText(Pos, ToU32(TextColor), TextValue);
     if (HoverT > 0.01f)
-    {
         Window->DrawList->AddLine(ImVec2(Pos.x, Bounds.Max.y - 1.0f),
                                   ImVec2(Pos.x + TextSize.x, Bounds.Max.y - 1.0f),
                                   ToU32(WithMultipliedAlpha(TextColor, HoverT)),
                                   Sizes().BorderWidth);
-    }
 
     if (Pressed && Url && Url[0])
     {
@@ -353,13 +349,9 @@ void BadgeNumber(int Value, BadgeVariant Variant)
 {
     char Buffer[24] = {};
     if (Value > 99)
-    {
         std::snprintf(Buffer, sizeof(Buffer), "99+");
-    }
     else
-    {
         std::snprintf(Buffer, sizeof(Buffer), "%d", Value);
-    }
     Badge(Buffer, Variant);
 }
 
@@ -448,13 +440,9 @@ bool Button(const char* Label, const ImVec2& Size, ButtonVariant Variant)
 
     ImVec2 ActualSize = Size;
     if (ActualSize.x <= 0.0f)
-    {
         ActualSize.x = CalcButtonAutoWidth(Label);
-    }
     if (ActualSize.y <= 0.0f)
-    {
         ActualSize.y = Sizes().ControlHeight;
-    }
     return ImGui::Button(Label, ActualSize);
 }
 
@@ -584,13 +572,9 @@ bool IconButtonWithText(const char* Id, Icon IconValue, const char* Label, const
     const float  IconPadding = 3.0f;
     ImVec2       ActualSize  = Size;
     if (ActualSize.x <= 0.0f)
-    {
         ActualSize.x = IconSize.x + TextSize.x + ImGui::GetStyle().FramePadding.x * 2.0f + IconPadding;
-    }
     if (ActualSize.y <= 0.0f)
-    {
         ActualSize.y = Sizes().ControlHeight;
-    }
 
     ImGui::PushID(Id);
     const bool Pressed = ImGui::Button("", ActualSize);
@@ -644,9 +628,7 @@ bool Toggle(const char* Label, bool* Value)
     bool       Held    = false;
     const bool Pressed = ImGui::ButtonBehavior(Bounds, Id, &Hovered, &Held);
     if (Pressed && Value)
-    {
         *Value = !*Value;
-    }
 
     const bool   On         = Value && *Value;
     const float  HoverT     = AnimateBool(ChildAnimId(Id, "ToggleHover"), Hovered, 20.0f);
@@ -778,12 +760,10 @@ bool SegmentedControl(const char* Id, int* CurrentItem, const char* const Items[
         ImGui::InvisibleButton("##Segment", ImVec2(SegmentWidth, Height));
         const bool Hovered = ImGui::IsItemHovered();
         if (Hovered && Index != ClampedCurrent)
-        {
             Window->DrawList->AddRectFilled(ImVec2(SegmentMin.x + Inset, SegmentMin.y + Inset),
                                             ImVec2(SegmentMax.x - Inset, SegmentMax.y - Inset),
                                             ToU32(WithAlpha(C.SurfaceHover, 0.72f)),
                                             std::max(0.0f, S.ControlRounding - 2.0f));
-        }
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && *CurrentItem != Index)
         {
             *CurrentItem = Index;
@@ -871,16 +851,12 @@ void ProgressBar(const char* Id, float Fraction, const ImVec2& Size, const char*
     const ImVec2 End(Pos.x + Width, Pos.y + Height);
     DrawList->AddRectFilled(Pos, End, ToU32(C.Surface), Height * 0.5f);
     if (AnimatedValue > 0.0f)
-    {
         DrawList->AddRectFilled(Pos, ImVec2(Pos.x + Width * AnimatedValue, End.y), ToU32(C.Accent), Height * 0.5f);
-    }
     DrawList->AddRect(Pos, End, ToU32(C.Border), Height * 0.5f, 0, S.BorderWidth);
 
     if (Overlay && Overlay[0])
-    {
         DrawList->AddText(
             ImVec2(Pos.x + (Width - TextSize.x) * 0.5f, Pos.y + Height + 3.0f), ToU32(C.TextMuted), Overlay);
-    }
 }
 
 void IndeterminateProgressBar(const char* Id, const ImVec2& Size)
@@ -903,10 +879,8 @@ void IndeterminateProgressBar(const char* Id, const ImVec2& Size)
     ImDrawList* DrawList = ImGui::GetWindowDrawList();
     DrawList->AddRectFilled(Pos, ImVec2(Pos.x + Width, Pos.y + Height), ToU32(C.Surface), Height * 0.5f);
     if (EndX > Pos.x && StartX < Pos.x + Width)
-    {
         DrawList->AddRectFilled(
             ImVec2(std::max(Pos.x, StartX), Pos.y), ImVec2(EndX, Pos.y + Height), ToU32(C.Accent), Height * 0.5f);
-    }
 }
 
 void ProgressRing(const char* Id, float Fraction, float Radius, float Thickness)
@@ -1094,9 +1068,7 @@ bool BeginWindow(const char* Name, const WindowOptions& Options)
     const bool CountAsManagedWindow = Options.CountAsManagedWindow && (!Options.Open || *Options.Open);
     EnsureManagedWindowFrame();
     if (CountAsManagedWindow)
-    {
         g_VisibleManagedWindowCount++;
-    }
 
     ImGuiDir PreviousWindowMenuButtonPosition = ImGuiDir_None;
     if (DrawRightSideCollapseButton)
@@ -1108,9 +1080,7 @@ bool BeginWindow(const char* Name, const WindowOptions& Options)
 
     const bool Open = ImGui::Begin(Name, Options.Open, Flags);
     if (PreviousWindowMenuButtonPosition != ImGuiDir_None)
-    {
         ImGui::GetStyle().WindowMenuButtonPosition = PreviousWindowMenuButtonPosition;
-    }
     return Open;
 }
 
@@ -1144,9 +1114,7 @@ void DrawTitleBarCollapseButton(const char* Id, const char* CollapseTooltip, con
     const float ButtonSize   = ImMax(1.0f, TitleBarRect.GetHeight() - Style.FramePadding.y * 2.0f);
     float       RightPadding = Style.FramePadding.x;
     if (Window->HasCloseButton)
-    {
         RightPadding += ButtonSize + Style.ItemInnerSpacing.x;
-    }
 
     const ImVec2 ButtonMin(TitleBarRect.Max.x - RightPadding - ButtonSize, TitleBarRect.Min.y + Style.FramePadding.y);
     if (ButtonMin.x <= TitleBarRect.Min.x)
@@ -1161,13 +1129,9 @@ void DrawTitleBarCollapseButton(const char* Id, const char* CollapseTooltip, con
     DrawList->PopClipRect();
 
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip))
-    {
         ImGui::SetTooltip("%s", Window->Collapsed ? RestoreTooltip : CollapseTooltip);
-    }
     if (Pressed)
-    {
         ImGui::SetWindowCollapsed(Window, !Window->Collapsed, ImGuiCond_Always);
-    }
 }
 
 bool BeginPanelChild(const char* Id, const PanelChildOptions& Options)

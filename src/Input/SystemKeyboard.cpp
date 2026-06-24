@@ -19,9 +19,7 @@ static bool SendVirtualKey(WORD VirtualKey, bool Down)
     InputValue.type   = INPUT_KEYBOARD;
     InputValue.ki.wVk = VirtualKey;
     if (!Down)
-    {
         InputValue.ki.dwFlags = KEYEVENTF_KEYUP;
-    }
 
     return SendInput(1, &InputValue, sizeof(InputValue)) == 1;
 }
@@ -37,33 +35,25 @@ bool TapVirtualKeyChord(const WORD* PVirtualKeys, std::size_t Count, DWORD Press
         return false;
 
     for (std::size_t i = 0; i < Count; i++)
-    {
         if (!PVirtualKeys[i])
             return false;
-    }
 
     for (std::size_t i = 0; i < Count; i++)
     {
         if (!SendVirtualKey(PVirtualKeys[i], true))
         {
             for (std::size_t j = i; j > 0; j--)
-            {
                 SendVirtualKey(PVirtualKeys[j - 1], false);
-            }
             return false;
         }
     }
 
     if (PressMs > 0)
-    {
         Sleep(PressMs);
-    }
 
     bool Released = true;
     for (std::size_t i = Count; i > 0; i--)
-    {
         Released = SendVirtualKey(PVirtualKeys[i - 1], false) && Released;
-    }
     return Released;
 }
 } // namespace RorinnnTools::Input

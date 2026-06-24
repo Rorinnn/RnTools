@@ -99,13 +99,9 @@ static void DrawModuleArrow(
     const float RightT = 1.0f - DownT;
 
     if (RightT > 0.01f)
-    {
         DrawCenteredIcon(DrawList, Font, Icon::CaretRight, Center, FontSize, ToU32(WithMultipliedAlpha(Color, RightT)));
-    }
     if (DownT > 0.01f)
-    {
         DrawCenteredIcon(DrawList, Font, Icon::CaretDown, Center, FontSize, ToU32(WithMultipliedAlpha(Color, DownT)));
-    }
 }
 
 static bool DrawModuleCheckbox(const ImRect& Bounds, ImGuiID Id, bool* Value, bool Enabled)
@@ -120,9 +116,7 @@ static bool DrawModuleCheckbox(const ImRect& Bounds, ImGuiID Id, bool* Value, bo
         Hovered = IsRectInteractive(Bounds);
         Pressed = Hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left);
         if (Pressed)
-        {
             *Value = !*Value;
-        }
     }
 
     const ColorTokens& C          = Colors();
@@ -130,13 +124,9 @@ static bool DrawModuleCheckbox(const ImRect& Bounds, ImGuiID Id, bool* Value, bo
     const float        CheckT     = SmoothValue(ChildId(Id, "Check"), *Value ? 1.0f : 0.0f, 18.0f, *Value ? 1.0f : 0.0f);
     ImVec4             FrameColor = Hovered && Enabled ? C.SurfaceHover : C.Surface;
     if (*Value)
-    {
         FrameColor = Blend(FrameColor, C.Accent, 0.78f);
-    }
     if (!Enabled)
-    {
         FrameColor = WithMultipliedAlpha(FrameColor, 0.52f);
-    }
 
     const float Radius = 4.0f;
     DrawList->AddRectFilled(Bounds.Min, Bounds.Max, ToU32(FrameColor), Radius);
@@ -242,9 +232,7 @@ bool DrawVerticalSplitter(const char* Id, const VerticalSplitterOptions& Options
     const bool Hovered = ImGui::IsItemHovered();
     const bool Active  = ImGui::IsItemActive();
     if (Hovered || Active)
-    {
         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-    }
 
     const ImVec2 HitMin    = ImGui::GetItemRectMin();
     const ImVec2 HitMax    = ImGui::GetItemRectMax();
@@ -262,13 +250,9 @@ bool BeginPanel(const char* Id, const PanelOptions& Options)
     const SizeTokens& S          = Sizes();
     ImGuiChildFlags   ChildFlags = 0;
     if (Options.Border)
-    {
         ChildFlags |= ImGuiChildFlags_Borders;
-    }
     if (Options.FitHeight)
-    {
         ChildFlags |= ImGuiChildFlags_AutoResizeY;
-    }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, S.PanelRounding);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, S.PanelPadding);
@@ -348,9 +332,7 @@ bool BeginModule(const char* Id, const char* Name, const ModuleHeaderOptions& Op
     const float LastBodyHeight     = Storage->GetFloat(BodyHeightId, 0.0f);
     float       AnimatedBodyHeight = LastBodyHeight * Saturate(OpenT);
     if (OpenT > 0.001f && AnimatedBodyHeight < 1.0f)
-    {
         AnimatedBodyHeight = 1.0f;
-    }
 
     const bool  BottomDescription = HasDescription && Options.DescriptionAtBottomWhenOpen && OpenT > 0.001f;
     const float BottomDescriptionHeight =
@@ -449,9 +431,7 @@ void EndModule()
     const float MouseWheel  = ImGui::GetIO().MouseWheel;
     ImGui::EndChild();
     if (Frame.Storage)
-    {
         Frame.Storage->SetFloat(Frame.BodyHeightId, BodyHeight);
-    }
     if (BodyHovered && MouseWheel != 0.0f && Frame.ScrollParent)
     {
         const float ScrollStep = ImGui::GetTextLineHeightWithSpacing() * 3.0f;
