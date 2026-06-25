@@ -108,6 +108,18 @@ static void* ReplaceSlot(void** Slot, void* RedirectAddress)
     return Original;
 }
 
+static void** GetVTableSlot(void* Instance, int Offset)
+{
+    if (!Instance || Offset < 0)
+        return nullptr;
+
+    void** Table = *reinterpret_cast<void***>(Instance);
+    if (!Table)
+        return nullptr;
+
+    return &Table[Offset];
+}
+
 HookResult HookFromAddress(int Token, void* TargetAddress, void* RedirectAddress)
 {
     VehHookStatus Status = InstallVehHookHandler();
@@ -124,6 +136,102 @@ HookResult HookFromAddress(int Token, void* TargetAddress, void* RedirectAddress
     return MakeHookResult(Status, TargetAddress);
 }
 
+FunctionPointerHook::FunctionPointerHook(FunctionPointerHook&& Other) noexcept
+{
+    *this = std::move(Other);
+}
+
+FunctionPointerHook& FunctionPointerHook::operator=(FunctionPointerHook&& Other) noexcept
+{
+    if (this == &Other)
+        return *this;
+
+    Restore();
+
+    Slot     = Other.Slot;
+    Original = Other.Original;
+    Other.Reset();
+    return *this;
+}
+
+FunctionPointerHook::~FunctionPointerHook()
+{
+    Restore();
+}
+
+bool FunctionPointerHook::Install(void** NewSlot, void* RedirectAddress)
+{
+    if (IsInstalled())
+        return true;
+    if (!NewSlot || !RedirectAddress)
+        return false;
+
+    void* NewOriginal = ReplaceSlot(NewSlot, RedirectAddress);
+    if (!NewOriginal)
+        return false;
+
+    Slot     = NewSlot;
+    Original = NewOriginal;
+    return true;
+}
+
+bool FunctionPointerHook::Restore()
+{
+    if (!IsInstalled())
+        return true;
+
+    const bool Restored = ReplaceSlot(Slot, Original) != nullptr;
+    if (Restored)
+        Reset();
+    return Restored;
+}
+
+bool FunctionPointerHook::IsInstalled() const
+{
+    return Slot && Original;
+}
+
+void** FunctionPointerHook::GetSlot() const
+{
+    return Slot;
+}
+
+void* FunctionPointerHook::GetOriginal() const
+{
+    return Original;
+}
+
+void FunctionPointerHook::Reset()
+{
+    Slot     = nullptr;
+    Original = nullptr;
+}
+
+bool VTableHook::Install(void* Instance, int Offset, void* RedirectAddress)
+{
+    return Hook.Install(GetVTableSlot(Instance, Offset), RedirectAddress);
+}
+
+bool VTableHook::Restore()
+{
+    return Hook.Restore();
+}
+
+bool VTableHook::IsInstalled() const
+{
+    return Hook.IsInstalled();
+}
+
+void** VTableHook::GetSlot() const
+{
+    return Hook.GetSlot();
+}
+
+void* VTableHook::GetOriginal() const
+{
+    return Hook.GetOriginal();
+}
+
 void* ReplaceFunctionPointer(void** Slot, void* RedirectAddress)
 {
     return ReplaceSlot(Slot, RedirectAddress);
@@ -131,8 +239,7 @@ void* ReplaceFunctionPointer(void** Slot, void* RedirectAddress)
 
 void* ReplaceVTableSlot(void* Instance, int Offset, void* RedirectAddress)
 {
-    void** Table = *reinterpret_cast<void***>(Instance);
-    return ReplaceFunctionPointer(&Table[Offset], RedirectAddress);
+    return ReplaceFunctionPointer(GetVTableSlot(Instance, Offset), RedirectAddress);
 }
 
 HookResult HookFromSignature(int Token, RorinnnTools::Memory::SigScanner& Scanner, std::string_view Signature, void* RedirectAddress)
@@ -188,11 +295,11 @@ HookResult HookFromFunctionPointer(int Token, void** FunctionPointer, void* Redi
 
 HookResult HookFromVTable(int Token, void* Instance, int Offset, void* RedirectAddress)
 {
-    if (!Instance)
+    void** Slot = GetVTableSlot(Instance, Offset);
+    if (!Slot || !*Slot)
         return MakeHookResult(VehHookStatus::InvalidArgument, nullptr);
 
-    void** Table  = *reinterpret_cast<void***>(Instance);
-    void*  Target = Table[Offset];
+    void* Target = *Slot;
     return HookFromAddress(Token, Target, RedirectAddress);
 }
 } // namespace RorinnnTools::Hook

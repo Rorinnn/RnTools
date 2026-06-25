@@ -72,6 +72,49 @@ struct HookResult
     bool Succeeded() const { return Status == VehHookStatus::Ok; }
 };
 
+class FunctionPointerHook
+{
+  public:
+    FunctionPointerHook()                                      = default;
+    FunctionPointerHook(const FunctionPointerHook&)            = delete;
+    FunctionPointerHook& operator=(const FunctionPointerHook&) = delete;
+    FunctionPointerHook(FunctionPointerHook&& Other) noexcept;
+    FunctionPointerHook& operator=(FunctionPointerHook&& Other) noexcept;
+    ~FunctionPointerHook();
+
+    bool   Install(void** Slot, void* RedirectAddress);
+    bool   Restore();
+    bool   IsInstalled() const;
+    void** GetSlot() const;
+    void*  GetOriginal() const;
+
+  private:
+    void Reset();
+
+    void** Slot     = nullptr;
+    void*  Original = nullptr;
+};
+
+class VTableHook
+{
+  public:
+    VTableHook()                                       = default;
+    VTableHook(const VTableHook&)                      = delete;
+    VTableHook& operator=(const VTableHook&)           = delete;
+    VTableHook(VTableHook&& Other) noexcept            = default;
+    VTableHook& operator=(VTableHook&& Other) noexcept = default;
+    ~VTableHook()                                      = default;
+
+    bool   Install(void* Instance, int Offset, void* RedirectAddress);
+    bool   Restore();
+    bool   IsInstalled() const;
+    void** GetSlot() const;
+    void*  GetOriginal() const;
+
+  private:
+    FunctionPointerHook Hook;
+};
+
 HookResult HookFromAddress(int Token, void* TargetAddress, void* RedirectAddress);
 HookResult HookFromSignature(int Token, RorinnnTools::Memory::SigScanner& Scanner, std::string_view Signature, void* RedirectAddress);
 HookResult HookFromSymbol(int Token, const wchar_t* ModuleName, const char* SymbolName, void* RedirectAddress);
