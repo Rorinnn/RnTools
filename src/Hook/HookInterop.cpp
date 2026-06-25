@@ -9,18 +9,28 @@ import std;
 
 namespace RorinnnTools::Hook
 {
-static int Unprotect(void* Region)
+static bool Unprotect(void* Region, DWORD& OriginalProtection)
 {
-    MEMORY_BASIC_INFORMATION Mbi;
-    VirtualQuery((LPCVOID)Region, &Mbi, sizeof(Mbi));
-    VirtualProtect(Mbi.BaseAddress, Mbi.RegionSize, PAGE_READWRITE, &Mbi.Protect);
-    return Mbi.Protect;
+    if (!Region)
+        return false;
+
+    MEMORY_BASIC_INFORMATION Mbi = {};
+    if (!VirtualQuery(Region, &Mbi, sizeof(Mbi)))
+        return false;
+
+    OriginalProtection = Mbi.Protect;
+    return VirtualProtect(Mbi.BaseAddress, Mbi.RegionSize, PAGE_READWRITE, &Mbi.Protect) != FALSE;
 }
 
-static void Protect(void* Region, int Protection)
+static void Protect(void* Region, DWORD Protection)
 {
-    MEMORY_BASIC_INFORMATION Mbi;
-    VirtualQuery((LPCVOID)Region, &Mbi, sizeof(Mbi));
+    if (!Region)
+        return;
+
+    MEMORY_BASIC_INFORMATION Mbi = {};
+    if (!VirtualQuery(Region, &Mbi, sizeof(Mbi)))
+        return;
+
     VirtualProtect(Mbi.BaseAddress, Mbi.RegionSize, Protection, &Mbi.Protect);
 }
 
@@ -83,10 +93,16 @@ static void* FindImportThunk(HMODULE Module, const char* ImportedModuleName, con
 
 static void* ReplaceSlot(void** Slot, void* RedirectAddress)
 {
+    if (!Slot)
+        return nullptr;
+
     void* Original = *Slot;
 
-    int OriginalProtection = Unprotect(Slot);
-    *Slot                  = RedirectAddress;
+    DWORD OriginalProtection = 0;
+    if (!Unprotect(Slot, OriginalProtection))
+        return nullptr;
+
+    *Slot = RedirectAddress;
     Protect(Slot, OriginalProtection);
 
     return Original;
