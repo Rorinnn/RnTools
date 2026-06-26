@@ -13,15 +13,9 @@ class CallStackSpoof
 
     bool Init(std::uint64_t XorKey);
 
-    std::uint64_t GetTrampoline() const
-    {
-        return m_Trampoline;
-    }
+    std::uint64_t GetTrampoline() const;
 
-    bool IsReady() const
-    {
-        return m_Trampoline != 0;
-    }
+    bool IsReady() const;
 
     template <typename RetT = std::uint64_t,
               typename... Args,

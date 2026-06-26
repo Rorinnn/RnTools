@@ -8,21 +8,15 @@ export namespace RorinnnTools
 class BinaryReader
 {
   public:
-    BinaryReader(const std::uint8_t* PData, std::size_t Size, std::size_t Offset = 0) : PData(PData), Size(Size), Offset(Offset) {}
+    BinaryReader(const std::uint8_t* PData, std::size_t Size, std::size_t Offset = 0);
 
-    std::size_t GetOffset() const { return Offset; }
-    std::size_t GetSize() const { return Size; }
-    std::size_t GetRemaining() const { return Offset <= Size ? Size - Offset : 0; }
-    bool        IsEnd() const { return Offset == Size; }
-    bool        IsValid() const { return PData || Size == 0; }
+    std::size_t GetOffset() const;
+    std::size_t GetSize() const;
+    std::size_t GetRemaining() const;
+    bool        IsEnd() const;
+    bool        IsValid() const;
 
-    bool SetOffset(std::size_t NewOffset)
-    {
-        if (NewOffset > Size)
-            return false;
-        Offset = NewOffset;
-        return true;
-    }
+    bool SetOffset(std::size_t NewOffset);
 
     template <typename T>
     bool Read(T& Value)
@@ -36,39 +30,11 @@ class BinaryReader
         return true;
     }
 
-    bool ReadBytes(void* PBuffer, std::size_t Count)
-    {
-        if (!PBuffer && Count)
-            return false;
-        if (!CanRead(Count))
-            return false;
-
-        if (Count)
-            std::memcpy(PBuffer, PData + Offset, Count);
-        Offset += Count;
-        return true;
-    }
-
-    bool ReadString(std::string& Value)
-    {
-        std::uint32_t     Length      = 0;
-        const std::size_t StartOffset = Offset;
-        if (!Read(Length) || !CanRead(Length))
-        {
-            Offset = StartOffset;
-            return false;
-        }
-
-        Value.assign(reinterpret_cast<const char*>(PData + Offset), Length);
-        Offset += Length;
-        return true;
-    }
+    bool ReadBytes(void* PBuffer, std::size_t Count);
+    bool ReadString(std::string& Value);
 
   private:
-    bool CanRead(std::size_t Count) const
-    {
-        return IsValid() && Offset <= Size && Count <= Size - Offset;
-    }
+    bool CanRead(std::size_t Count) const;
 
     const std::uint8_t* PData  = nullptr;
     std::size_t         Size   = 0;

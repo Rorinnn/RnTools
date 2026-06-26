@@ -346,4 +346,14 @@ bool CallStackSpoof::Init(std::uint64_t XorKey)
     return true;
 }
 
+std::uint64_t CallStackSpoof::GetTrampoline() const
+{
+    return m_Trampoline;
+}
+
+bool CallStackSpoof::IsReady() const
+{
+    return m_Trampoline != 0;
+}
+
 } // namespace RorinnnTools::Stealth

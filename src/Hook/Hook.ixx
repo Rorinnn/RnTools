@@ -69,7 +69,7 @@ struct HookResult
     VehHookStatus Status  = VehHookStatus::InvalidArgument;
     void*         Address = nullptr;
 
-    bool Succeeded() const { return Status == VehHookStatus::Ok; }
+    bool Succeeded() const;
 };
 
 class FunctionPointerHook

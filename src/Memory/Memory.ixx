@@ -33,8 +33,8 @@ struct MemoryRange
     std::uintptr_t Start = 0;
     std::size_t    Size  = 0;
 
-    bool           IsValid() const { return Start && Size; }
-    std::uintptr_t End() const { return Start + Size; }
+    bool           IsValid() const;
+    std::uintptr_t End() const;
 };
 
 bool           ReadBytes(std::uintptr_t Ptr, void* PBuffer, std::size_t Size);
@@ -114,13 +114,7 @@ T Read(std::uintptr_t Ptr)
     return Value;
 }
 
-inline std::vector<std::uint8_t> ReadRaw(std::uintptr_t Ptr, std::size_t Size)
-{
-    std::vector<std::uint8_t> Bytes(Size);
-    if (Size)
-        std::memcpy(Bytes.data(), reinterpret_cast<const void*>(Ptr), Size);
-    return Bytes;
-}
+std::vector<std::uint8_t> ReadRaw(std::uintptr_t Ptr, std::size_t Size);
 
 template <typename T>
 void Write(std::uintptr_t Ptr, const T& Value)
@@ -128,11 +122,7 @@ void Write(std::uintptr_t Ptr, const T& Value)
     std::memcpy(reinterpret_cast<void*>(Ptr), &Value, sizeof(T));
 }
 
-inline void WriteRaw(std::uintptr_t Ptr, std::span<const std::uint8_t> Bytes)
-{
-    if (!Bytes.empty())
-        std::memcpy(reinterpret_cast<void*>(Ptr), Bytes.data(), Bytes.size());
-}
+void WriteRaw(std::uintptr_t Ptr, std::span<const std::uint8_t> Bytes);
 
 template <typename T>
 bool TryRead(std::uintptr_t Ptr, T& Value)
@@ -140,13 +130,7 @@ bool TryRead(std::uintptr_t Ptr, T& Value)
     return ReadBytes(Ptr, &Value, sizeof(T));
 }
 
-inline bool TryReadRaw(std::uintptr_t Ptr, std::size_t Size, std::vector<std::uint8_t>& Bytes)
-{
-    Bytes.assign(Size, 0);
-    if (!Size)
-        return true;
-    return ReadBytes(Ptr, Bytes.data(), Bytes.size());
-}
+bool TryReadRaw(std::uintptr_t Ptr, std::size_t Size, std::vector<std::uint8_t>& Bytes);
 
 template <typename T>
 bool TryWrite(std::uintptr_t Ptr, const T& Value)
@@ -154,32 +138,15 @@ bool TryWrite(std::uintptr_t Ptr, const T& Value)
     return WriteBytes(Ptr, &Value, sizeof(T));
 }
 
-inline bool TryWriteRaw(std::uintptr_t Ptr, std::span<const std::uint8_t> Bytes)
-{
-    if (Bytes.empty())
-        return true;
-    return WriteBytes(Ptr, Bytes.data(), Bytes.size());
-}
+bool TryWriteRaw(std::uintptr_t Ptr, std::span<const std::uint8_t> Bytes);
 
-inline bool TryReadString(std::uintptr_t Ptr, std::size_t MaxLength, std::string& Value)
-{
-    return RorinnnTools::Memory::TryReadString(Ptr, MaxLength, Value);
-}
+bool TryReadString(std::uintptr_t Ptr, std::size_t MaxLength, std::string& Value);
 
-inline std::string ReadString(std::uintptr_t Ptr, std::size_t MaxLength)
-{
-    return RorinnnTools::Memory::ReadString(Ptr, MaxLength);
-}
+std::string ReadString(std::uintptr_t Ptr, std::size_t MaxLength);
 
-inline bool TryReadCString(std::uintptr_t Ptr, std::string& Value, std::size_t ChunkSize = 256, std::size_t MaxLength = 64 * 1024)
-{
-    return RorinnnTools::Memory::TryReadCString(Ptr, Value, ChunkSize, MaxLength);
-}
+bool TryReadCString(std::uintptr_t Ptr, std::string& Value, std::size_t ChunkSize = 256, std::size_t MaxLength = 64 * 1024);
 
-inline std::string ReadCString(std::uintptr_t Ptr, std::size_t ChunkSize = 256, std::size_t MaxLength = 64 * 1024)
-{
-    return RorinnnTools::Memory::ReadCString(Ptr, ChunkSize, MaxLength);
-}
+std::string ReadCString(std::uintptr_t Ptr, std::size_t ChunkSize = 256, std::size_t MaxLength = 64 * 1024);
 } // namespace MemoryHelper
 
 class SigScanner

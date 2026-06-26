@@ -10,6 +10,11 @@ import std;
 
 namespace RorinnnTools::Hook
 {
+bool HookResult::Succeeded() const
+{
+    return Status == VehHookStatus::Ok;
+}
+
 namespace
 {
 #pragma region 运行时状态
