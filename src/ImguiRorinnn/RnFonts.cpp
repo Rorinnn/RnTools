@@ -39,7 +39,7 @@ static ImFont* LoadWindowsTextFont(ImFontAtlas* Atlas, float TextSize, bool& Use
     char FontPath[MAX_PATH] = {};
     ExpandEnvironmentStringsA("%SystemRoot%\\Fonts\\msyhbd.ttc", FontPath, MAX_PATH);
     if (GetFileAttributesA(FontPath) != INVALID_FILE_ATTRIBUTES)
-        return Atlas->AddFontFromFileTTF(FontPath, TextSize, nullptr, Atlas->GetGlyphRangesChineseSimplifiedCommon());
+        return Atlas->AddFontFromFileTTF(FontPath, TextSize, nullptr, Atlas->GetGlyphRangesChineseFull());
 #else
     (void)TextSize;
 #endif
