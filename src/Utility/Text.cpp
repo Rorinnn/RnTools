@@ -158,10 +158,29 @@ std::uint32_t ParseUInt32(TextSlice Slice)
     return Value;
 }
 
+int ParseInt32(TextSlice Slice)
+{
+    const std::string Text = Slice.ToString();
+    return Text.empty() ? 0 : static_cast<int>(std::strtol(Text.c_str(), nullptr, 10));
+}
+
 float ParseFloat(TextSlice Slice)
 {
     const std::string Text = Slice.ToString();
     return Text.empty() ? 0.0f : static_cast<float>(std::strtod(Text.c_str(), nullptr));
+}
+
+void CopyCString(char* PBuffer, std::size_t BufferSize, const char* PText)
+{
+    if (!PBuffer || BufferSize == 0)
+        return;
+
+    const char* Source = PText ? PText : "";
+    std::size_t Length = std::strlen(Source);
+    if (Length >= BufferSize)
+        Length = BufferSize - 1;
+    std::memcpy(PBuffer, Source, Length);
+    PBuffer[Length] = '\0';
 }
 
 std::string FormatU64(std::uint64_t Value)

@@ -31,7 +31,9 @@ void SplitLines(std::string_view Text, std::vector<TextSlice>& Lines, bool KeepE
 void SplitFields(std::string_view Text, char Separator, std::vector<TextSlice>& Fields);
 
 std::uint32_t ParseUInt32(TextSlice Slice);
+int           ParseInt32(TextSlice Slice);
 float         ParseFloat(TextSlice Slice);
+void          CopyCString(char* PBuffer, std::size_t BufferSize, const char* PText);
 
 std::string FormatU64(std::uint64_t Value);
 std::string FormatSize(std::size_t Value);

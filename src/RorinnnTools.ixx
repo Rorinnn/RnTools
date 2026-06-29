@@ -9,5 +9,6 @@ export import :Input;
 export import :Memory;
 export import :BinaryReader;
 export import :Text;
+export import :Algorithms;
 export import :Stealth;
 export import :ImguiRorinnn;

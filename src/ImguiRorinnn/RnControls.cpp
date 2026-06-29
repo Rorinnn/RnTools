@@ -859,6 +859,15 @@ void ProgressBar(const char* Id, float Fraction, const ImVec2& Size, const char*
             ImVec2(Pos.x + (Width - TextSize.x) * 0.5f, Pos.y + Height + 3.0f), ToU32(C.TextMuted), Overlay);
 }
 
+void DrawTextCenteredX(ImDrawList* DrawList, float CenterX, float Y, ImU32 Color, std::string_view Text)
+{
+    if (!DrawList || Text.empty())
+        return;
+
+    const ImVec2 Size = ImGui::CalcTextSize(Text.data(), Text.data() + Text.size());
+    DrawList->AddText(ImVec2(CenterX - Size.x * 0.5f, Y), Color, Text.data(), Text.data() + Text.size());
+}
+
 void IndeterminateProgressBar(const char* Id, const ImVec2& Size)
 {
     const ColorTokens& C       = Colors();

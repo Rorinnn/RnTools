@@ -603,6 +603,7 @@ void ProgressBar(const char*   Id,
                  float         Fraction,
                  const ImVec2& Size    = ImVec2(0.0f, 0.0f),
                  const char*   Overlay = nullptr);
+void DrawTextCenteredX(ImDrawList* DrawList, float CenterX, float Y, ImU32 Color, std::string_view Text);
 void IndeterminateProgressBar(const char* Id, const ImVec2& Size = ImVec2(0.0f, 0.0f));
 void ProgressRing(const char* Id, float Fraction, float Radius = 0.0f, float Thickness = 0.0f);
 void Spinner(const char* Id, float Radius = 0.0f, float Thickness = 0.0f);
