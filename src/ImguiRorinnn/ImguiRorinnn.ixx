@@ -612,6 +612,30 @@ bool BeginTable(const char* Id, int ColumnCount, ImGuiTableFlags Flags = 0, cons
 void TableHeadersRow(const char* const Headers[], int HeaderCount);
 void EndTable();
 
+inline float CalcTableColumnWidth(std::initializer_list<std::string_view> Texts)
+{
+    float Width = 0.0f;
+    for (std::string_view Text : Texts)
+        Width = (std::max)(Width, ImGui::CalcTextSize(Text.data(), Text.data() + Text.size()).x);
+
+    const ImGuiStyle& Style = ImGui::GetStyle();
+    return std::ceil(Width + Style.CellPadding.x * 2.0f + Style.FramePadding.x * 2.0f);
+}
+
+template <class Range, class Formatter>
+float CalcTableColumnWidth(std::string_view Header, const Range& Rows, Formatter&& Format)
+{
+    float Width = ImGui::CalcTextSize(Header.data(), Header.data() + Header.size()).x;
+    for (const auto& Row : Rows)
+    {
+        const std::string Text = std::forward<Formatter>(Format)(Row);
+        Width                  = (std::max)(Width, ImGui::CalcTextSize(Text.c_str()).x);
+    }
+
+    const ImGuiStyle& Style = ImGui::GetStyle();
+    return std::ceil(Width + Style.CellPadding.x * 2.0f + Style.FramePadding.x * 2.0f);
+}
+
 void LabelValue(const char* Label, const char* Value);
 void LabelValue(const char* Label, int Value);
 void LabelValue(const char* Label, float Value, const char* Format = "%.2f");
