@@ -28,6 +28,7 @@ enum class Icon : std::uint32_t
     CaretRight      = 0xF0DA,
     Gear            = 0xF013,
     Wrench          = 0xF0AD,
+    Bug             = 0xF188,
     Play            = 0xF04B,
     Stop            = 0xF04D,
     Minus           = 0xF068,

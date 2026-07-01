@@ -24,6 +24,8 @@ static const char* IconLiteral(Icon Value)
             return "\xEF\x80\x93";
         case Icon::Wrench:
             return "\xEF\x82\xAD";
+        case Icon::Bug:
+            return "\xEF\x86\x88";
         case Icon::Play:
             return "\xEF\x81\x8B";
         case Icon::Stop:
